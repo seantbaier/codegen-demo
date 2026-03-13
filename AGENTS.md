@@ -78,3 +78,8 @@ tsconfig.json     # TypeScript config with @/* path alias
 
 - No `.env` files are committed (all `.env*` patterns are gitignored)
 - Node.js package manager: npm (uses `package-lock.json`)
+
+## Source Control
+
+- Use conventional commits for commit messages
+
