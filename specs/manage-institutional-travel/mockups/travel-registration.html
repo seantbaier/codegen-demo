@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Via TRM — Register Your Travel</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f4f2f7;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    /* ---- Progress bar (top of viewport) ---- */
+    .progress-bar-track {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: #e0dce6;
+      z-index: 100;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 25%;
+      background: #E8107C;
+      transition: width 0.4s ease;
+    }
+
+    /* ---- Shell ---- */
+    .shell {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Top bar ---- */
+    .top-bar {
+      background: #1A0B2E;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .via-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: #E8107C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      color: #fff;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .top-bar h1 {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .top-bar p {
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    /* ---- Step indicator ---- */
+    .steps-bar {
+      display: flex;
+      align-items: flex-start;
+      padding: 20px 20px 4px;
+    }
+
+    .step {
+      flex: 0 0 auto;
+      width: 60px;
+      text-align: center;
+    }
+
+    .step-dot-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+
+    .step-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    }
+
+    .step.completed .step-dot {
+      background: #2EBF14;
+      color: #fff;
+    }
+
+    .step.active .step-dot {
+      background: #E8107C;
+      color: #fff;
+      box-shadow: 0 0 0 4px rgba(232,16,124,0.2);
+    }
+
+    .step.upcoming .step-dot {
+      background: #e0dce6;
+      color: #999;
+    }
+
+    .step-label {
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.3;
+      color: #888;
+      transition: color 0.3s;
+    }
+
+    .step.active .step-label {
+      color: #E8107C;
+      font-weight: 600;
+    }
+
+    .step.completed .step-label {
+      color: #2EBF14;
+    }
+
+    .connector {
+      flex: 1;
+      height: 2px;
+      background: #e0dce6;
+      margin-top: 14px;
+      transition: background 0.3s;
+    }
+
+    .connector.done {
+      background: #2EBF14;
+    }
+
+    /* ---- Form area ---- */
+    .form-area {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1A0B2E;
+      margin-bottom: 4px;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+
+    /* ---- Form fields ---- */
+    .field {
+      margin-bottom: 20px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1A0B2E;
+      margin-bottom: 6px;
+    }
+
+    .field input[type="text"],
+    .field input[type="date"],
+    .field select {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #d8d4de;
+      border-radius: 8px;
+      font-size: 15px;
+      color: #333;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+      -webkit-appearance: none;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #E8107C;
+      box-shadow: 0 0 0 3px rgba(232,16,124,0.1);
+    }
+
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    /* ---- Radio group ---- */
+    .radio-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .radio-option {
+      flex: 1;
+      position: relative;
+    }
+
+    .radio-option input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .radio-option label.radio-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border: 1.5px solid #d8d4de;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .radio-option input[type="radio"]:checked + label.radio-label {
+      border-color: #E8107C;
+      background: rgba(232,16,124,0.06);
+      color: #E8107C;
+      font-weight: 600;
+    }
+
+    .radio-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.2s;
+    }
+
+    .radio-dot::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: transparent;
+      transition: background 0.2s;
+    }
+
+    .radio-option input[type="radio"]:checked + label.radio-label .radio-dot {
+      border-color: #E8107C;
+    }
+
+    .radio-option input[type="radio"]:checked + label.radio-label .radio-dot::after {
+      background: #E8107C;
+    }
+
+    /* ---- Group name field (hidden by default) ---- */
+    .group-name-field {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+      margin-top: 0;
+    }
+
+    .group-name-field.visible {
+      max-height: 100px;
+      opacity: 1;
+      margin-top: 12px;
+    }
+
+    .group-name-field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #d8d4de;
+      border-radius: 8px;
+      font-size: 15px;
+      color: #333;
+      background: #fff;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .group-name-field input:focus {
+      border-color: #E8107C;
+      box-shadow: 0 0 0 3px rgba(232,16,124,0.1);
+    }
+
+    .group-name-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1A0B2E;
+      margin-bottom: 6px;
+    }
+
+    /* ---- Date row ---- */
+    .date-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .date-row .field {
+      flex: 1;
+    }
+
+    /* ---- Risk indicator ---- */
+    .risk-indicator {
+      background: #f0faf0;
+      border: 1px solid #c5eac2;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+
+    .risk-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #2EBF14;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .risk-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .risk-country {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1A0B2E;
+    }
+
+    .risk-note {
+      font-size: 13px;
+      color: #5a8a55;
+      margin-top: 2px;
+    }
+
+    /* ---- CTA button ---- */
+    .cta-area {
+      padding: 16px 20px 28px;
+      background: #fff;
+      border-top: 1px solid #eee;
+    }
+
+    .btn-next {
+      width: 100%;
+      padding: 16px;
+      background: #E8107C;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      font-family: inherit;
+    }
+
+    .btn-next:hover {
+      background: #d00e6f;
+    }
+
+    .btn-next:active {
+      transform: scale(0.98);
+    }
+
+    /* ---- Step content visibility ---- */
+    .step-content {
+      display: none;
+    }
+
+    .step-content.active {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    /* ---- Placeholder cards for future steps ---- */
+    .placeholder-card {
+      border: 2px dashed #d8d4de;
+      border-radius: 10px;
+      padding: 32px 20px;
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 16px;
+    }
+
+    .placeholder-card .icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .placeholder-card p {
+      font-size: 14px;
+    }
+
+    .btn-back {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: #1A0B2E;
+      border: 1.5px solid #d8d4de;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .btn-back:hover {
+      border-color: #1A0B2E;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar-track">
+  <div class="progress-bar-fill" id="progressFill"></div>
+</div>
+
+<div class="shell">
+
+  <!-- Top bar -->
+  <div class="top-bar">
+    <div class="via-logo">Via</div>
+    <div>
+      <h1>Register Your Travel</h1>
+      <p>Via Travel &mdash; Traveler Portal</p>
+    </div>
+  </div>
+
+  <!-- Step indicator -->
+  <div class="steps-bar" id="stepsBar">
+    <div class="step active" data-step="1">
+      <div class="step-dot-row"><div class="step-dot">1</div></div>
+      <div class="step-label">Trip Details</div>
+    </div>
+    <div class="connector" id="conn1"></div>
+    <div class="step upcoming" data-step="2">
+      <div class="step-dot-row"><div class="step-dot">2</div></div>
+      <div class="step-label">Itinerary</div>
+    </div>
+    <div class="connector" id="conn2"></div>
+    <div class="step upcoming" data-step="3">
+      <div class="step-dot-row"><div class="step-dot">3</div></div>
+      <div class="step-label">Emergency Contacts</div>
+    </div>
+    <div class="connector" id="conn3"></div>
+    <div class="step upcoming" data-step="4">
+      <div class="step-dot-row"><div class="step-dot">4</div></div>
+      <div class="step-label">Review &amp; Submit</div>
+    </div>
+  </div>
+
+  <!-- Step 1: Trip Details -->
+  <div class="step-content active" id="step1">
+    <div class="form-area">
+      <div class="section-title">Trip Details</div>
+      <div class="section-subtitle">Tell us about your upcoming travel</div>
+
+      <!-- Trip Type -->
+      <div class="field">
+        <label>Trip Type</label>
+        <div class="radio-group">
+          <div class="radio-option">
+            <input type="radio" name="tripType" id="solo" value="solo" checked>
+            <label for="solo" class="radio-label"><span class="radio-dot"></span> Solo Travel</label>
+          </div>
+          <div class="radio-option">
+            <input type="radio" name="tripType" id="group" value="group">
+            <label for="group" class="radio-label"><span class="radio-dot"></span> Group Travel</label>
+          </div>
+        </div>
+        <div class="group-name-field" id="groupNameField">
+          <label for="groupName">Group Name</label>
+          <input type="text" id="groupName" placeholder="e.g., Spring 2026 Barcelona Cohort">
+        </div>
+      </div>
+
+      <!-- Purpose -->
+      <div class="field">
+        <label for="purpose">Purpose</label>
+        <select id="purpose">
+          <option value="study-abroad" selected>Study Abroad</option>
+          <option value="conference">Conference</option>
+          <option value="research">Research</option>
+          <option value="faculty-led">Faculty-Led Program</option>
+          <option value="personal">Personal Development</option>
+        </select>
+      </div>
+
+      <!-- Destination -->
+      <div class="field">
+        <label for="destination">Destination</label>
+        <input type="text" id="destination" value="Barcelona, Spain" placeholder="City, Country">
+      </div>
+
+      <!-- Risk indicator -->
+      <div class="risk-indicator" id="riskIndicator">
+        <div class="risk-header">
+          <span class="risk-country">Spain</span>
+          <span class="risk-badge"><span class="dot"></span> Low</span>
+        </div>
+        <div class="risk-note">No travel advisories currently in effect</div>
+      </div>
+
+      <!-- Dates -->
+      <div class="date-row">
+        <div class="field">
+          <label for="depart">Departure Date</label>
+          <input type="date" id="depart" value="2026-08-28">
+        </div>
+        <div class="field">
+          <label for="returnDate">Return Date</label>
+          <input type="date" id="returnDate" value="2026-12-15">
+        </div>
+      </div>
+
+      <!-- Department -->
+      <div class="field">
+        <label for="department">Department</label>
+        <select id="department">
+          <option value="" disabled>Select department</option>
+          <option value="liberal-arts" selected>College of Liberal Arts</option>
+          <option value="engineering">College of Engineering</option>
+          <option value="sciences">College of Sciences</option>
+          <option value="business">School of Business</option>
+          <option value="education">School of Education</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="cta-area">
+      <button class="btn-next" id="nextBtn1">Next: Itinerary &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Itinerary (placeholder) -->
+  <div class="step-content" id="step2">
+    <div class="form-area">
+      <div class="section-title">Itinerary</div>
+      <div class="section-subtitle">Add your flights, accommodations, and activities</div>
+
+      <div class="placeholder-card">
+        <div class="icon">&#9992;</div>
+        <p>Add your outbound flight details</p>
+      </div>
+
+      <div class="placeholder-card">
+        <div class="icon">&#127968;</div>
+        <p>Add accommodation details</p>
+      </div>
+
+      <div class="placeholder-card">
+        <div class="icon">&#9992;</div>
+        <p>Add your return flight details</p>
+      </div>
+    </div>
+
+    <div class="cta-area">
+      <button class="btn-back" id="backBtn2">&larr; Back to Trip Details</button>
+      <button class="btn-next" id="nextBtn2">Next: Emergency Contacts &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Emergency Contacts (placeholder) -->
+  <div class="step-content" id="step3">
+    <div class="form-area">
+      <div class="section-title">Emergency Contacts</div>
+      <div class="section-subtitle">Provide at least one emergency contact</div>
+
+      <div class="placeholder-card">
+        <div class="icon">&#128100;</div>
+        <p>Add primary emergency contact</p>
+      </div>
+
+      <div class="placeholder-card">
+        <div class="icon">&#128100;</div>
+        <p>Add secondary emergency contact (optional)</p>
+      </div>
+    </div>
+
+    <div class="cta-area">
+      <button class="btn-back" id="backBtn3">&larr; Back to Itinerary</button>
+      <button class="btn-next" id="nextBtn3">Next: Review &amp; Submit &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Review & Submit (placeholder) -->
+  <div class="step-content" id="step4">
+    <div class="form-area">
+      <div class="section-title">Review &amp; Submit</div>
+      <div class="section-subtitle">Confirm your details before submitting</div>
+
+      <div class="placeholder-card">
+        <div class="icon">&#128203;</div>
+        <p>Your trip summary will appear here</p>
+      </div>
+    </div>
+
+    <div class="cta-area">
+      <button class="btn-back" id="backBtn4">&larr; Back to Emergency Contacts</button>
+      <button class="btn-next" id="submitBtn" style="background:#2EBF14;">Submit Registration &#10003;</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  (function() {
+    // State
+    var currentStep = 1;
+    var totalSteps = 4;
+    var checkmark = '\u2713';
+
+    // DOM refs
+    var progressFill = document.getElementById('progressFill');
+    var steps = document.querySelectorAll('.steps-bar .step');
+    var connectors = [
+      document.getElementById('conn1'),
+      document.getElementById('conn2'),
+      document.getElementById('conn3')
+    ];
+    var stepContents = [
+      document.getElementById('step1'),
+      document.getElementById('step2'),
+      document.getElementById('step3'),
+      document.getElementById('step4')
+    ];
+
+    function goToStep(n) {
+      if (n < 1 || n > totalSteps) return;
+      currentStep = n;
+
+      // Update progress bar
+      progressFill.style.width = ((currentStep / totalSteps) * 100) + '%';
+
+      // Update step indicators
+      steps.forEach(function(el) {
+        var s = parseInt(el.dataset.step, 10);
+        el.classList.remove('active', 'completed', 'upcoming');
+        var dot = el.querySelector('.step-dot');
+        if (s < currentStep) {
+          el.classList.add('completed');
+          dot.textContent = checkmark;
+        } else if (s === currentStep) {
+          el.classList.add('active');
+          dot.textContent = s;
+        } else {
+          el.classList.add('upcoming');
+          dot.textContent = s;
+        }
+      });
+
+      // Update connectors
+      connectors.forEach(function(c, i) {
+        if (i + 1 < currentStep) {
+          c.classList.add('done');
+        } else {
+          c.classList.remove('done');
+        }
+      });
+
+      // Show/hide step content
+      stepContents.forEach(function(el, i) {
+        if (i + 1 === currentStep) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    }
+
+    // Navigation buttons
+    document.getElementById('nextBtn1').addEventListener('click', function() { goToStep(2); });
+    document.getElementById('nextBtn2').addEventListener('click', function() { goToStep(3); });
+    document.getElementById('nextBtn3').addEventListener('click', function() { goToStep(4); });
+    document.getElementById('backBtn2').addEventListener('click', function() { goToStep(1); });
+    document.getElementById('backBtn3').addEventListener('click', function() { goToStep(2); });
+    document.getElementById('backBtn4').addEventListener('click', function() { goToStep(3); });
+    document.getElementById('submitBtn').addEventListener('click', function() {
+      alert('Registration submitted successfully! You will receive a confirmation email shortly.');
+    });
+
+    // Trip type toggle (Solo / Group)
+    var soloRadio = document.getElementById('solo');
+    var groupRadio = document.getElementById('group');
+    var groupNameField = document.getElementById('groupNameField');
+
+    function updateTripType() {
+      if (groupRadio.checked) {
+        groupNameField.classList.add('visible');
+      } else {
+        groupNameField.classList.remove('visible');
+      }
+    }
+
+    soloRadio.addEventListener('change', updateTripType);
+    groupRadio.addEventListener('change', updateTripType);
+
+    // Initialize
+    goToStep(1);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Via International - Student Compliance Portal</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f3f0f7;
+    color: #333;
+    min-height: 100vh;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    min-height: 100vh;
+    box-shadow: 0 0 40px rgba(26, 11, 46, 0.08);
+  }
+
+  /* ── Navbar ── */
+  .navbar {
+    background: #1A0B2E;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .navbar-logo svg { height: 28px; }
+
+  .navbar-logo span {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .navbar-logo .sub {
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.6);
+    display: block;
+    letter-spacing: 0;
+  }
+
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .navbar-user {
+    color: rgba(255,255,255,0.85);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .notif-bell {
+    position: relative;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  .notif-bell svg { height: 22px; width: 22px; }
+
+  .notif-badge {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    background: #E8107C;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #1A0B2E;
+  }
+
+  /* ── Welcome Banner ── */
+  .welcome-banner {
+    background: linear-gradient(135deg, #1A0B2E 0%, #2d1650 100%);
+    padding: 24px 20px 20px;
+    color: #fff;
+  }
+
+  .welcome-banner h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .badge-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-visa {
+    background: rgba(232, 16, 124, 0.2);
+    border: 1px solid rgba(232, 16, 124, 0.5);
+    color: #f7a0cf;
+  }
+
+  .badge-sevis {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.75);
+    font-weight: 500;
+    font-size: 11px;
+  }
+
+  /* ── Section shared ── */
+  .section {
+    padding: 20px;
+  }
+
+  .section + .section {
+    border-top: 1px solid #eee;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1A0B2E;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title svg { height: 18px; width: 18px; flex-shrink: 0; }
+
+  /* ── Compliance Checklist ── */
+  .checklist {
+    position: relative;
+    padding-left: 28px;
+  }
+
+  .checklist::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: #e0dce6;
+  }
+
+  .checklist-item {
+    position: relative;
+    padding: 10px 0 10px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .checklist-item:last-child { padding-bottom: 0; }
+
+  .cl-icon {
+    position: absolute;
+    left: -28px;
+    top: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  .cl-icon--done { background: #2EBF14; color: #fff; }
+  .cl-icon--progress { background: #FD5A15; color: #fff; }
+  .cl-icon--pending { background: #d5d0dc; color: #fff; }
+
+  .cl-content { flex: 1; }
+
+  .cl-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1A0B2E;
+    line-height: 1.3;
+  }
+
+  .cl-label--dim { color: #999; }
+
+  .cl-sub {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .tag--action {
+    background: #fff3ec;
+    color: #FD5A15;
+    border: 1px solid #fdd7c3;
+  }
+
+  /* ── Action Required Card ── */
+  .action-card {
+    background: #fff;
+    border: 1px solid #fdd7c3;
+    border-left: 4px solid #FD5A15;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 0 20px 0;
+  }
+
+  .action-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .action-card-header svg { color: #FD5A15; height: 18px; width: 18px; }
+
+  .action-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1A0B2E;
+  }
+
+  .action-card p {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+
+  .action-due {
+    font-size: 12px;
+    color: #FD5A15;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: #E8107C;
+    color: #fff;
+  }
+
+  .btn-primary:hover { background: #d00e6f; }
+
+  .btn-outline {
+    background: transparent;
+    color: #1A0B2E;
+    border: 1px solid #d5d0dc;
+    padding: 7px 14px;
+    font-size: 13px;
+  }
+
+  .btn-outline:hover { background: #f8f6fb; }
+
+  .btn-sm {
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+
+  /* ── Documents ── */
+  .doc-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .doc-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: #faf9fc;
+    border-radius: 8px;
+    border: 1px solid #eee;
+  }
+
+  .doc-info { flex: 1; }
+
+  .doc-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1A0B2E;
+  }
+
+  .doc-meta {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+  }
+
+  .doc-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .badge-pending {
+    background: #fff3ec;
+    color: #FD5A15;
+    border: 1px solid #fdd7c3;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* ── Messages ── */
+  .msg-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .msg-item {
+    padding: 12px 14px;
+    background: #faf9fc;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .msg-item:hover { background: #f0edf5; }
+
+  .msg-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .msg-sender {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1A0B2E;
+  }
+
+  .msg-time {
+    font-size: 11px;
+    color: #999;
+  }
+
+  .msg-preview {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .msg-unread { position: relative; }
+
+  .msg-unread::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 8px;
+    height: 8px;
+    background: #E8107C;
+    border-radius: 50%;
+  }
+
+  /* ── Help Button ── */
+  .help-section {
+    padding: 20px;
+    padding-top: 10px;
+    padding-bottom: 32px;
+    text-align: center;
+  }
+
+  .btn-help {
+    width: 100%;
+    justify-content: center;
+    background: #1A0B2E;
+    color: #fff;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+
+  .btn-help:hover { background: #2d1650; }
+
+  /* ── Upload Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 11, 46, 0.5);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: #fff;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 32px;
+    animation: slideUp 0.25s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: #d5d0dc;
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A0B2E;
+    margin-bottom: 6px;
+  }
+
+  .modal p {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  .upload-zone {
+    border: 2px dashed #d5d0dc;
+    border-radius: 12px;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    margin-bottom: 16px;
+  }
+
+  .upload-zone:hover {
+    border-color: #E8107C;
+    background: #fdf0f6;
+  }
+
+  .upload-zone.dragover {
+    border-color: #E8107C;
+    background: #fdf0f6;
+  }
+
+  .upload-zone svg { margin-bottom: 10px; }
+
+  .upload-zone .uz-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1A0B2E;
+    margin-bottom: 4px;
+  }
+
+  .upload-zone .uz-sub {
+    font-size: 12px;
+    color: #999;
+  }
+
+  .upload-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .upload-file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f0fdef;
+    border: 1px solid #c3edb8;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1A0B2E;
+    font-weight: 500;
+  }
+
+  .upload-file-item svg { flex-shrink: 0; }
+
+  .upload-file-item .remove-file {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .modal-actions .btn { flex: 1; justify-content: center; }
+
+  .btn-cancel {
+    background: #f3f0f7;
+    color: #1A0B2E;
+  }
+
+  .btn-cancel:hover { background: #e5e0ed; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-logo">
+      <svg viewBox="0 0 80 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#E8107C">Via</text>
+        <text x="36" y="20" font-family="Arial, sans-serif" font-size="11" font-weight="600" fill="rgba(255,255,255,0.6)">TRM</text>
+      </svg>
+      <span>
+        <span class="sub">International</span>
+      </span>
+    </div>
+    <div class="navbar-right">
+      <span class="navbar-user">Yuki Tanaka</span>
+      <button class="notif-bell" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="notif-badge">2</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Welcome Banner -->
+  <div class="welcome-banner">
+    <h1>Welcome, Yuki</h1>
+    <div class="badge-row">
+      <span class="badge badge-visa">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        F-1 Student
+      </span>
+      <span class="badge badge-sevis">SEVIS: N0034821956</span>
+    </div>
+  </div>
+
+  <!-- Compliance Checklist -->
+  <div class="section">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1A0B2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      Compliance Checklist
+    </div>
+    <div class="checklist">
+
+      <div class="checklist-item">
+        <div class="cl-icon cl-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cl-content">
+          <div class="cl-label">Immigration Documents Submitted</div>
+          <div class="cl-sub">Completed on Feb 3, 2026</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <div class="cl-icon cl-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cl-content">
+          <div class="cl-label">Health Insurance Verified</div>
+          <div class="cl-sub">Completed on Feb 10, 2026</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <div class="cl-icon cl-icon--done">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="cl-content">
+          <div class="cl-label">Orientation Completed</div>
+          <div class="cl-sub">Completed on Feb 14, 2026</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <div class="cl-icon cl-icon--progress">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="cl-content">
+          <div class="cl-label">
+            Work Authorization &mdash; OPT Application
+            <span class="tag tag--action">Action Required</span>
+          </div>
+          <div class="cl-sub">In progress &mdash; documents needed</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <div class="cl-icon cl-icon--pending">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        </div>
+        <div class="cl-content">
+          <div class="cl-label cl-label--dim">Exit Interview</div>
+          <div class="cl-sub">Not yet available</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Action Required Card -->
+  <div class="action-card">
+    <div class="action-card-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FD5A15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <h3>Complete OPT Application</h3>
+    </div>
+    <p>Upload your EAD card copy and employer verification letter to proceed with your OPT application.</p>
+    <div class="action-due">Due: March 25, 2026</div>
+    <button class="btn btn-primary" onclick="openUploadModal()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Upload Documents
+    </button>
+  </div>
+
+  <!-- My Documents -->
+  <div class="section">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1A0B2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+      </svg>
+      My Documents
+    </div>
+    <div class="doc-list">
+      <div class="doc-item">
+        <div class="doc-info">
+          <div class="doc-name">I-20 (Current)</div>
+          <div class="doc-meta">Issued Jan 15, 2026 &middot; Program end May 2028</div>
+        </div>
+        <div class="doc-actions">
+          <button class="btn btn-outline btn-sm">View</button>
+          <button class="btn btn-outline btn-sm">Download</button>
+        </div>
+      </div>
+      <div class="doc-item">
+        <div class="doc-info">
+          <div class="doc-name">I-20 (Previous)</div>
+          <div class="doc-meta">Issued Aug 20, 2024 &middot; Superseded</div>
+        </div>
+        <div class="doc-actions">
+          <button class="btn btn-outline btn-sm">View</button>
+        </div>
+      </div>
+      <div class="doc-item">
+        <div class="doc-info">
+          <div class="doc-name">OPT Recommendation Letter</div>
+          <div class="doc-meta">Requested Mar 5, 2026</div>
+        </div>
+        <div class="doc-actions">
+          <span class="badge-pending">Pending</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="section">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1A0B2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      Messages
+    </div>
+    <div class="msg-list">
+      <div class="msg-item msg-unread">
+        <div class="msg-header">
+          <span class="msg-sender">Sarah Chen, DSO Advisor</span>
+          <span class="msg-time">Mar 12, 2026</span>
+        </div>
+        <div class="msg-preview">Hi Yuki, just a reminder that your OPT application documents are due by March 25th. Please upload your EAD card copy as soon as possible so we can review it before the deadline.</div>
+      </div>
+      <div class="msg-item msg-unread">
+        <div class="msg-header">
+          <span class="msg-sender">Sarah Chen, DSO Advisor</span>
+          <span class="msg-time">Mar 8, 2026</span>
+        </div>
+        <div class="msg-preview">Your OPT recommendation letter has been submitted to USCIS. You'll receive a notification once it's been processed. In the meantime, please prepare your employer verification letter.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Request Help -->
+  <div class="help-section">
+    <button class="btn btn-help">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Request Help
+    </button>
+  </div>
+
+</div>
+
+<!-- Upload Modal -->
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>Upload Documents</h2>
+    <p>Upload your EAD card copy and employer verification letter. Accepted formats: PDF, JPG, PNG (max 10 MB each).</p>
+
+    <div class="upload-zone" id="uploadZone" onclick="triggerFileInput()">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d5d0dc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <div class="uz-text">Tap to select files</div>
+      <div class="uz-sub">or drag and drop here</div>
+    </div>
+
+    <input type="file" id="fileInput" multiple accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFiles(this.files)">
+
+    <div class="upload-file-list" id="fileList"></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeUploadModal()">Cancel</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitFiles()" style="display:none">
+        Submit Documents
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var uploadModal = document.getElementById('uploadModal');
+  var uploadZone = document.getElementById('uploadZone');
+  var fileInput = document.getElementById('fileInput');
+  var fileList = document.getElementById('fileList');
+  var submitBtn = document.getElementById('submitBtn');
+  var selectedFiles = [];
+
+  function openUploadModal() {
+    uploadModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeUploadModal() {
+    uploadModal.classList.remove('active');
+    document.body.style.overflow = '';
+    selectedFiles = [];
+    renderFileList();
+  }
+
+  function triggerFileInput() {
+    fileInput.click();
+  }
+
+  function handleFiles(files) {
+    for (var i = 0; i < files.length; i++) {
+      if (selectedFiles.length < 5) {
+        selectedFiles.push(files[i]);
+      }
+    }
+    renderFileList();
+  }
+
+  function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    renderFileList();
+  }
+
+  function createFileIcon() {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '16');
+    svg.setAttribute('height', '16');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', '#2EBF14');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z');
+    var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    polyline.setAttribute('points', '14 2 14 8 20 8');
+    svg.appendChild(path);
+    svg.appendChild(polyline);
+    return svg;
+  }
+
+  function renderFileList() {
+    while (fileList.firstChild) {
+      fileList.removeChild(fileList.firstChild);
+    }
+
+    if (selectedFiles.length === 0) {
+      submitBtn.style.display = 'none';
+      return;
+    }
+
+    submitBtn.style.display = '';
+
+    for (var i = 0; i < selectedFiles.length; i++) {
+      (function(index) {
+        var item = document.createElement('div');
+        item.className = 'upload-file-item';
+
+        item.appendChild(createFileIcon());
+
+        var nameSpan = document.createElement('span');
+        nameSpan.textContent = selectedFiles[index].name;
+        item.appendChild(nameSpan);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.className = 'remove-file';
+        removeBtn.textContent = '\u00D7';
+        removeBtn.addEventListener('click', function() {
+          removeFile(index);
+        });
+        item.appendChild(removeBtn);
+
+        fileList.appendChild(item);
+      })(i);
+    }
+  }
+
+  function submitFiles() {
+    if (selectedFiles.length === 0) return;
+    var count = selectedFiles.length;
+    closeUploadModal();
+    alert(count + ' document' + (count > 1 ? 's' : '') + ' submitted successfully! Your advisor will review them shortly.');
+  }
+
+  // Close modal on overlay click
+  uploadModal.addEventListener('click', function(e) {
+    if (e.target === uploadModal) closeUploadModal();
+  });
+
+  // Drag and drop support
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+  });
+
+  uploadZone.addEventListener('dragleave', function() {
+    uploadZone.classList.remove('dragover');
+  });
+
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+</script>
+
+</body>
+</html>

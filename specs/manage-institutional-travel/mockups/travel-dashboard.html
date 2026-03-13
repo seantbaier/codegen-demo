@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Via Travel — Travel Risk Management Dashboard</title>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --pink: #E8107C;
+      --purple: #1A0B2E;
+      --green: #2EBF14;
+      --blue: #026FFF;
+      --orange: #FD5A15;
+      --red: #DC2626;
+      --white: #FFFFFF;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-400: #9CA3AF;
+      --gray-500: #6B7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --sidebar-width: 240px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--purple);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-logo .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-logo .logo-text span {
+      color: var(--pink);
+    }
+
+    .sidebar-logo .logo-sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 4px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      color: var(--white);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-item.active {
+      color: var(--white);
+      background: rgba(232, 16, 124, 0.15);
+      border-left-color: var(--pink);
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--pink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .sidebar-footer-info {
+      font-size: 13px;
+    }
+
+    .sidebar-footer-info .name {
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .sidebar-footer-info .role {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Main content */
+    .main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .top-bar h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .top-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--pink);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background: #c70d69;
+    }
+
+    .btn-outline {
+      background: var(--white);
+      color: var(--gray-700);
+      border: 1px solid var(--gray-300);
+    }
+
+    .btn-outline:hover {
+      background: var(--gray-50);
+    }
+
+    .content {
+      padding: 24px 32px;
+    }
+
+    /* Metrics */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--gray-200);
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .metric-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .metric-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .metric-icon.green {
+      background: rgba(46, 191, 20, 0.12);
+      color: var(--green);
+    }
+
+    .metric-icon.orange {
+      background: rgba(253, 90, 21, 0.12);
+      color: var(--orange);
+    }
+
+    .metric-icon.red {
+      background: rgba(220, 38, 38, 0.12);
+      color: var(--red);
+    }
+
+    .metric-icon.blue {
+      background: rgba(2, 111, 255, 0.12);
+      color: var(--blue);
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .metric-value.green { color: var(--green); }
+    .metric-value.orange { color: var(--orange); }
+    .metric-value.red { color: var(--red); }
+    .metric-value.blue { color: var(--blue); }
+
+    .metric-label {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-top: 4px;
+    }
+
+    /* Map section */
+    .map-section {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--gray-200);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .section-header .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green);
+      background: rgba(46, 191, 20, 0.1);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .map-container {
+      position: relative;
+      height: 420px;
+      background: #0A0620;
+      overflow: hidden;
+    }
+
+    /* SVG world map */
+    .world-map {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Traveler cluster pins */
+    .cluster-pin {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .cluster-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--white);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15), 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.15s ease;
+    }
+
+    .cluster-pin:hover .cluster-dot {
+      transform: scale(1.15);
+    }
+
+    .cluster-dot.safe { background: var(--green); }
+    .cluster-dot.advisory { background: var(--orange); }
+    .cluster-dot.critical { background: var(--red); }
+
+    .cluster-label {
+      margin-top: 6px;
+      background: rgba(0, 0, 0, 0.75);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .map-legend {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(10, 6, 32, 0.85);
+      backdrop-filter: blur(8px);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      gap: 16px;
+      z-index: 20;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.safe { background: var(--green); }
+    .legend-dot.advisory { background: var(--orange); }
+    .legend-dot.critical { background: var(--red); }
+
+    /* Advisories section */
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .advisories-section, .departures-section {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+    }
+
+    .advisory-card {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .advisory-card:last-child {
+      border-bottom: none;
+    }
+
+    .advisory-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .severity-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .severity-badge.warning {
+      background: rgba(253, 90, 21, 0.12);
+      color: var(--orange);
+    }
+
+    .severity-badge.critical {
+      background: rgba(220, 38, 38, 0.12);
+      color: var(--red);
+    }
+
+    .advisory-location {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .advisory-desc {
+      font-size: 13px;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+
+    .advisory-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .travelers-affected {
+      font-size: 12px;
+      color: var(--gray-500);
+      font-weight: 500;
+    }
+
+    .travelers-affected strong {
+      color: var(--gray-700);
+    }
+
+    .btn-safecheck {
+      background: var(--pink);
+      color: var(--white);
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-safecheck:hover {
+      background: #c70d69;
+    }
+
+    /* Departures table */
+    .departures-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .departures-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gray-400);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+
+    .departures-table td {
+      font-size: 13px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-100);
+      color: var(--gray-700);
+    }
+
+    .departures-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .traveler-name {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .status-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .status-tag.registered {
+      background: rgba(2, 111, 255, 0.1);
+      color: var(--blue);
+    }
+
+    .status-tag.pre-departure {
+      background: rgba(46, 191, 20, 0.1);
+      color: var(--green);
+    }
+
+    .status-tag.in-transit {
+      background: rgba(232, 16, 124, 0.1);
+      color: var(--pink);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--purple);
+      color: var(--white);
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Via<span>Travel</span></div>
+      <div class="logo-sub">Travel Risk Management</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Travelers
+      </a>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Groups
+      </a>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Approvals
+      </a>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        SafeCheck
+      </a>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reports
+      </a>
+      <a class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="avatar">JM</div>
+      <div class="sidebar-footer-info">
+        <div class="name">Jane Mitchell</div>
+        <div class="role">Travel Risk Manager</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <div class="top-bar">
+      <h1>Dashboard</h1>
+      <div class="top-bar-actions">
+        <button class="btn btn-outline">Export Report</button>
+        <button class="btn btn-primary">+ Register Traveler</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="metric-value green">247</div>
+            <div class="metric-label">Active Travelers</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div>
+            <div class="metric-value orange">12</div>
+            <div class="metric-label">Pending Approvals</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div>
+            <div class="metric-value red">3</div>
+            <div class="metric-label">Active Advisories</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 12 15 16 10"/></svg>
+          </div>
+          <div>
+            <div class="metric-value blue">98%</div>
+            <div class="metric-label">Check-in Rate</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Map -->
+      <div class="map-section">
+        <div class="section-header">
+          <h2>Live Traveler Map</h2>
+          <div class="live-badge"><div class="live-dot"></div> Live</div>
+        </div>
+        <div class="map-container">
+          <!-- Stylized world map SVG -->
+          <svg class="world-map" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#1e1248" />
+                <stop offset="100%" stop-color="#0A0620" />
+              </radialGradient>
+            </defs>
+            <rect width="1000" height="500" fill="url(#glow)" />
+            <!-- Grid lines -->
+            <g stroke="rgba(255,255,255,0.04)" stroke-width="0.5">
+              <line x1="0" y1="100" x2="1000" y2="100"/>
+              <line x1="0" y1="200" x2="1000" y2="200"/>
+              <line x1="0" y1="250" x2="1000" y2="250"/>
+              <line x1="0" y1="300" x2="1000" y2="300"/>
+              <line x1="0" y1="400" x2="1000" y2="400"/>
+              <line x1="200" y1="0" x2="200" y2="500"/>
+              <line x1="400" y1="0" x2="400" y2="500"/>
+              <line x1="500" y1="0" x2="500" y2="500"/>
+              <line x1="600" y1="0" x2="600" y2="500"/>
+              <line x1="800" y1="0" x2="800" y2="500"/>
+            </g>
+            <!-- Simplified continents -->
+            <g fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.12)" stroke-width="0.5">
+              <!-- North America -->
+              <path d="M80,80 L200,60 L240,100 L260,160 L220,200 L200,250 L170,280 L140,260 L100,200 L60,140 Z"/>
+              <!-- South America -->
+              <path d="M200,280 L240,270 L280,300 L290,360 L270,420 L240,450 L210,430 L190,370 L180,320 Z"/>
+              <!-- Europe -->
+              <path d="M420,80 L500,70 L520,100 L510,140 L480,160 L450,150 L430,120 Z"/>
+              <!-- Africa -->
+              <path d="M440,200 L500,180 L540,220 L550,300 L530,370 L490,400 L450,370 L430,300 L420,240 Z"/>
+              <!-- Asia -->
+              <path d="M520,60 L700,50 L780,80 L800,140 L760,200 L700,220 L640,200 L580,160 L540,120 Z"/>
+              <!-- Middle East -->
+              <path d="M540,160 L590,150 L620,180 L610,220 L570,230 L540,200 Z"/>
+              <!-- Australia -->
+              <path d="M740,340 L820,320 L860,350 L850,400 L800,410 L750,390 Z"/>
+              <!-- Southeast Asia / Islands -->
+              <path d="M700,220 L740,210 L770,240 L760,280 L720,290 L690,260 Z"/>
+            </g>
+          </svg>
+
+          <!-- Cluster pins -->
+          <div class="cluster-pin" style="top: 26%; left: 47%;">
+            <div class="cluster-dot safe">48</div>
+            <div class="cluster-label">48 Western Europe</div>
+          </div>
+          <div class="cluster-pin" style="top: 28%; left: 73%;">
+            <div class="cluster-dot advisory">23</div>
+            <div class="cluster-label">23 East Asia</div>
+          </div>
+          <div class="cluster-pin" style="top: 68%; left: 27%;">
+            <div class="cluster-dot safe">15</div>
+            <div class="cluster-label">15 South America</div>
+          </div>
+          <div class="cluster-pin" style="top: 40%; left: 57%;">
+            <div class="cluster-dot critical">8</div>
+            <div class="cluster-label">8 Middle East</div>
+          </div>
+          <div class="cluster-pin" style="top: 58%; left: 50%;">
+            <div class="cluster-dot advisory">12</div>
+            <div class="cluster-label">12 Africa</div>
+          </div>
+
+          <!-- Legend -->
+          <div class="map-legend">
+            <div class="legend-item"><div class="legend-dot safe"></div> No advisories</div>
+            <div class="legend-item"><div class="legend-dot advisory"></div> Travel advisory</div>
+            <div class="legend-item"><div class="legend-dot critical"></div> Do not travel</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-column: Advisories + Departures -->
+      <div class="two-column">
+        <!-- Recent Advisories -->
+        <div class="advisories-section">
+          <div class="section-header">
+            <h2>Recent Advisories</h2>
+            <a href="#" style="font-size:13px; color:var(--pink); text-decoration:none; font-weight:600;">View All</a>
+          </div>
+          <div class="advisory-card">
+            <div class="advisory-top">
+              <span class="severity-badge warning">Warning</span>
+              <span class="advisory-location">Civil Unrest — Paris, France</span>
+            </div>
+            <div class="advisory-desc">Ongoing protests in central Paris affecting public transport and access to major landmarks. Travelers advised to avoid Champs-Elysees area.</div>
+            <div class="advisory-bottom">
+              <span class="travelers-affected"><strong>12</strong> travelers affected</span>
+              <button class="btn-safecheck" onclick="showToast('SafeCheck sent to 12 travelers in Paris, France')">Send SafeCheck</button>
+            </div>
+          </div>
+          <div class="advisory-card">
+            <div class="advisory-top">
+              <span class="severity-badge critical">Critical</span>
+              <span class="advisory-location">Political Instability — Beirut, Lebanon</span>
+            </div>
+            <div class="advisory-desc">Escalating tensions and military activity reported near the capital. All non-essential travel suspended until further notice.</div>
+            <div class="advisory-bottom">
+              <span class="travelers-affected"><strong>3</strong> travelers affected</span>
+              <button class="btn-safecheck" onclick="showToast('SafeCheck sent to 3 travelers in Beirut, Lebanon')">Send SafeCheck</button>
+            </div>
+          </div>
+          <div class="advisory-card">
+            <div class="advisory-top">
+              <span class="severity-badge warning">Warning</span>
+              <span class="advisory-location">Severe Weather — Tokyo, Japan</span>
+            </div>
+            <div class="advisory-desc">Typhoon warning issued for the greater Tokyo area. Flight disruptions expected through the weekend. Travelers should monitor updates.</div>
+            <div class="advisory-bottom">
+              <span class="travelers-affected"><strong>8</strong> travelers affected</span>
+              <button class="btn-safecheck" onclick="showToast('SafeCheck sent to 8 travelers in Tokyo, Japan')">Send SafeCheck</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Departures Table -->
+        <div class="departures-section">
+          <div class="section-header">
+            <h2>Travelers Departing This Week</h2>
+            <a href="#" style="font-size:13px; color:var(--pink); text-decoration:none; font-weight:600;">View All</a>
+          </div>
+          <table class="departures-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Destination</th>
+                <th>Departure</th>
+                <th>Return</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="traveler-name">Sarah Chen</td>
+                <td>London, UK</td>
+                <td>Mar 14, 2026</td>
+                <td>Mar 21, 2026</td>
+                <td><span class="status-tag pre-departure">Pre-departure Complete</span></td>
+              </tr>
+              <tr>
+                <td class="traveler-name">Marcus Johnson</td>
+                <td>Berlin, Germany</td>
+                <td>Mar 15, 2026</td>
+                <td>Mar 22, 2026</td>
+                <td><span class="status-tag registered">Registered</span></td>
+              </tr>
+              <tr>
+                <td class="traveler-name">Aisha Patel</td>
+                <td>Nairobi, Kenya</td>
+                <td>Mar 13, 2026</td>
+                <td>Mar 25, 2026</td>
+                <td><span class="status-tag in-transit">In Transit</span></td>
+              </tr>
+              <tr>
+                <td class="traveler-name">David Kim</td>
+                <td>Tokyo, Japan</td>
+                <td>Mar 16, 2026</td>
+                <td>Mar 23, 2026</td>
+                <td><span class="status-tag registered">Registered</span></td>
+              </tr>
+              <tr>
+                <td class="traveler-name">Elena Rodriguez</td>
+                <td>Sao Paulo, Brazil</td>
+                <td>Mar 17, 2026</td>
+                <td>Mar 28, 2026</td>
+                <td><span class="status-tag pre-departure">Pre-departure Complete</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <div class="toast-icon">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <span id="toast-message"></span>
+  </div>
+
+  <script>
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

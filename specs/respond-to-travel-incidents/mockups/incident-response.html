@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Via TRM — Incident Response</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #F3F4F6; color: #1F2937; }
+
+  /* Sidebar */
+  .sidebar { position: fixed; top: 0; left: 0; width: 220px; height: 100vh; background: #1A0B2E; color: #fff; display: flex; flex-direction: column; z-index: 100; }
+  .sidebar-logo { padding: 24px 20px 20px; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidebar-logo span { color: #E8107C; }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 11px 20px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; transition: all 0.15s; }
+  .sidebar-nav a:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .sidebar-nav a.active { color: #fff; background: rgba(232,16,124,0.18); border-right: 3px solid #E8107C; }
+  .sidebar-nav a .icon { width: 20px; text-align: center; font-size: 16px; }
+  .sidebar-user { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 13px; color: rgba(255,255,255,0.5); }
+  .sidebar-user strong { color: #fff; display: block; margin-bottom: 2px; }
+
+  /* Main content */
+  .main { margin-left: 220px; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* Alert banner */
+  .alert-banner { background: linear-gradient(90deg, #7F1D1D, #991B1B, #7F1D1D); color: #fff; padding: 14px 28px; display: flex; align-items: center; gap: 16px; font-size: 14px; }
+  .alert-banner .pulse { width: 12px; height: 12px; background: #EF4444; border-radius: 50%; animation: pulse 1.5s infinite; flex-shrink: 0; }
+  @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.6); } 50% { opacity: 0.7; box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
+  .alert-banner .label { background: #DC2626; padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0; }
+  .alert-banner .detail { font-weight: 600; font-size: 15px; }
+  .alert-banner .affected { margin-left: auto; background: rgba(255,255,255,0.15); padding: 5px 14px; border-radius: 6px; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+
+  /* Content area */
+  .content { flex: 1; display: flex; gap: 20px; padding: 20px 24px; overflow-y: auto; }
+  .col-left { flex: 0 0 60%; max-width: 60%; display: flex; flex-direction: column; gap: 20px; }
+  .col-right { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+  .card-header { padding: 16px 20px; font-weight: 700; font-size: 15px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; }
+  .card-body { padding: 20px; }
+
+  /* Status summary */
+  .status-grid { display: flex; gap: 12px; margin-bottom: 20px; }
+  .status-tile { flex: 1; padding: 16px; border-radius: 8px; text-align: center; }
+  .status-tile.total { background: #F3F4F6; }
+  .status-tile.safe { background: #ECFDF5; border: 1px solid #A7F3D0; }
+  .status-tile.help { background: #FFF7ED; border: 1px solid #FED7AA; }
+  .status-tile.none { background: #FEF2F2; border: 1px solid #FECACA; }
+  .status-tile .num { font-size: 32px; font-weight: 800; line-height: 1; }
+  .status-tile.total .num { color: #1A0B2E; }
+  .status-tile.safe .num { color: #2EBF14; }
+  .status-tile.help .num { color: #FD5A15; }
+  .status-tile.none .num { color: #DC2626; }
+  .status-tile .lbl { font-size: 12px; color: #6B7280; margin-top: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  /* Progress bar */
+  .progress-wrap { margin-bottom: 4px; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 13px; color: #6B7280; margin-bottom: 6px; }
+  .progress-meta strong { color: #1F2937; }
+  .progress-bar { height: 10px; background: #E5E7EB; border-radius: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #2EBF14, #34D399); border-radius: 6px; transition: width 0.6s ease; }
+
+  /* Traveler list */
+  .traveler-list { max-height: 380px; overflow-y: auto; }
+  .traveler-row { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #F3F4F6; gap: 12px; font-size: 13px; transition: background 0.1s; }
+  .traveler-row:hover { background: #F9FAFB; }
+  .traveler-row.highlight { background: #FEF2F2; }
+  .traveler-row.highlight:hover { background: #FDE8E8; }
+  .traveler-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0; }
+  .traveler-info { flex: 1; min-width: 0; }
+  .traveler-name { font-weight: 600; color: #1F2937; }
+  .traveler-meta { color: #9CA3AF; font-size: 12px; margin-top: 2px; }
+  .traveler-location { flex: 0 0 140px; color: #6B7280; font-size: 12px; }
+  .traveler-checkin { flex: 0 0 110px; color: #9CA3AF; font-size: 12px; text-align: right; }
+
+  /* Badges */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; flex-shrink: 0; }
+  .badge-safe { background: #ECFDF5; color: #15803D; }
+  .badge-help { background: #FFF7ED; color: #C2410C; }
+  .badge-none { background: #FEF2F2; color: #DC2626; }
+
+  /* Send SafeCheck form */
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+  .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 13px; font-family: inherit; resize: vertical; }
+  .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #E8107C; box-shadow: 0 0 0 3px rgba(232,16,124,0.1); }
+  .btn-primary { background: #E8107C; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.15s; }
+  .btn-primary:hover { background: #C70D68; }
+
+  /* Communication log */
+  .comm-log { max-height: 200px; overflow-y: auto; }
+  .log-entry { padding: 10px 0; border-bottom: 1px solid #F3F4F6; font-size: 13px; }
+  .log-entry:last-child { border-bottom: none; }
+  .log-time { color: #9CA3AF; font-size: 11px; margin-bottom: 3px; }
+  .log-msg { color: #374151; }
+  .log-msg .sent { color: #E8107C; font-weight: 600; }
+  .log-msg .recv { color: #2EBF14; font-weight: 600; }
+
+  /* Quick stats */
+  .quick-stats { display: flex; gap: 10px; }
+  .stat-box { flex: 1; background: #F9FAFB; border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-box .val { font-size: 20px; font-weight: 800; color: #1A0B2E; }
+  .stat-box .lbl { font-size: 11px; color: #6B7280; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  /* Bottom action bar */
+  .action-bar { background: #fff; border-top: 1px solid #E5E7EB; padding: 14px 24px; display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+  .btn { padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+  .btn-outline { background: #fff; color: #374151; border-color: #D1D5DB; }
+  .btn-outline:hover { background: #F9FAFB; border-color: #9CA3AF; }
+  .btn-danger { background: #DC2626; color: #fff; }
+  .btn-danger:hover { background: #B91C1C; }
+  .btn-pink { background: #E8107C; color: #fff; }
+  .btn-pink:hover { background: #C70D68; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 80px; right: 32px; background: #1A0B2E; color: #fff; padding: 14px 24px; border-radius: 8px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(20px); opacity: 0; transition: all 0.3s ease; z-index: 1000; display: flex; align-items: center; gap: 10px; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast .toast-icon { font-size: 18px; }
+
+  /* Confirmation modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 12px; padding: 28px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal h3 { font-size: 18px; margin-bottom: 10px; color: #1A0B2E; }
+  .modal p { font-size: 14px; color: #6B7280; margin-bottom: 20px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">Via <span>TRM</span></div>
+  <nav class="sidebar-nav">
+    <a href="#"><span class="icon">&#9632;</span> Dashboard</a>
+    <a href="#"><span class="icon">&#9992;</span> Travelers</a>
+    <a href="#"><span class="icon">&#9872;</span> Programs</a>
+    <a href="#"><span class="icon">&#128196;</span> Applications</a>
+    <a href="#"><span class="icon">&#128203;</span> Compliance</a>
+    <a href="#" class="active"><span class="icon">&#128721;</span> SafeCheck</a>
+    <a href="#"><span class="icon">&#128202;</span> Reports</a>
+    <a href="#"><span class="icon">&#9881;</span> Settings</a>
+  </nav>
+  <div class="sidebar-user">
+    <strong>Sarah Mitchell</strong>
+    Risk &amp; Safety Manager
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Alert Banner -->
+  <div class="alert-banner">
+    <div class="pulse"></div>
+    <span class="label">Active Incident</span>
+    <span class="detail">Earthquake in Tokyo Region</span>
+    <span>Magnitude 6.2 &mdash; Reported at 14:32 JST</span>
+    <span class="affected">23 Travelers Affected</span>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Left Column -->
+    <div class="col-left">
+
+      <!-- SafeCheck Status Summary -->
+      <div class="card">
+        <div class="card-header">
+          SafeCheck Status
+          <span style="font-size:12px; font-weight:400; color:#9CA3AF;">Last updated: 2 min ago</span>
+        </div>
+        <div class="card-body">
+          <div class="status-grid">
+            <div class="status-tile total">
+              <div class="num">23</div>
+              <div class="lbl">Total</div>
+            </div>
+            <div class="status-tile safe">
+              <div class="num">15</div>
+              <div class="lbl">Safe</div>
+            </div>
+            <div class="status-tile help">
+              <div class="num">3</div>
+              <div class="lbl">Needs Help</div>
+            </div>
+            <div class="status-tile none">
+              <div class="num">5</div>
+              <div class="lbl">No Response</div>
+            </div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-meta">
+              <span>Check-in Rate</span>
+              <strong>65% (15 of 23)</strong>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 65%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Affected Travelers -->
+      <div class="card" style="flex:1;">
+        <div class="card-header">
+          Affected Travelers
+          <span style="font-size:12px; font-weight:400; color:#9CA3AF;">Sorted by status priority</span>
+        </div>
+        <div class="traveler-list" id="travelerList">
+          <!-- No Response (top) -->
+          <div class="traveler-row highlight">
+            <div class="traveler-avatar" style="background:#DC2626;">KT</div>
+            <div class="traveler-info"><div class="traveler-name">Kenji Tanaka</div><div class="traveler-meta">Spring Tokyo Exchange</div></div>
+            <div class="traveler-location">Shinjuku, Tokyo</div>
+            <span class="badge badge-none">&#10007; No Response</span>
+            <div class="traveler-checkin">--</div>
+          </div>
+          <div class="traveler-row highlight">
+            <div class="traveler-avatar" style="background:#DC2626;">LW</div>
+            <div class="traveler-info"><div class="traveler-name">Lisa Wang</div><div class="traveler-meta">Asia Business Immersion</div></div>
+            <div class="traveler-location">Shibuya, Tokyo</div>
+            <span class="badge badge-none">&#10007; No Response</span>
+            <div class="traveler-checkin">--</div>
+          </div>
+          <div class="traveler-row highlight">
+            <div class="traveler-avatar" style="background:#DC2626;">MJ</div>
+            <div class="traveler-info"><div class="traveler-name">Marcus Johnson</div><div class="traveler-meta">Spring Tokyo Exchange</div></div>
+            <div class="traveler-location">Chiyoda, Tokyo</div>
+            <span class="badge badge-none">&#10007; No Response</span>
+            <div class="traveler-checkin">--</div>
+          </div>
+          <div class="traveler-row highlight">
+            <div class="traveler-avatar" style="background:#DC2626;">AP</div>
+            <div class="traveler-info"><div class="traveler-name">Aisha Patel</div><div class="traveler-meta">Japan Cultural Studies</div></div>
+            <div class="traveler-location">Minato, Tokyo</div>
+            <span class="badge badge-none">&#10007; No Response</span>
+            <div class="traveler-checkin">--</div>
+          </div>
+          <div class="traveler-row highlight">
+            <div class="traveler-avatar" style="background:#DC2626;">DF</div>
+            <div class="traveler-info"><div class="traveler-name">Diego Flores</div><div class="traveler-meta">Asia Business Immersion</div></div>
+            <div class="traveler-location">Toshima, Tokyo</div>
+            <span class="badge badge-none">&#10007; No Response</span>
+            <div class="traveler-checkin">--</div>
+          </div>
+          <!-- Needs Help -->
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#FD5A15;">EB</div>
+            <div class="traveler-info"><div class="traveler-name">Emma Brooks</div><div class="traveler-meta">Spring Tokyo Exchange</div></div>
+            <div class="traveler-location">Meguro, Tokyo</div>
+            <span class="badge badge-help">&#9888; Needs Help</span>
+            <div class="traveler-checkin">14:51 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#FD5A15;">RK</div>
+            <div class="traveler-info"><div class="traveler-name">Ryan Kim</div><div class="traveler-meta">Japan Cultural Studies</div></div>
+            <div class="traveler-location">Setagaya, Tokyo</div>
+            <span class="badge badge-help">&#9888; Needs Help</span>
+            <div class="traveler-checkin">14:48 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#FD5A15;">SN</div>
+            <div class="traveler-info"><div class="traveler-name">Sophie Nguyen</div><div class="traveler-meta">Asia Business Immersion</div></div>
+            <div class="traveler-location">Shinagawa, Tokyo</div>
+            <span class="badge badge-help">&#9888; Needs Help</span>
+            <div class="traveler-checkin">14:45 JST</div>
+          </div>
+          <!-- Safe -->
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">JM</div>
+            <div class="traveler-info"><div class="traveler-name">James Miller</div><div class="traveler-meta">Spring Tokyo Exchange</div></div>
+            <div class="traveler-location">Nakano, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:55 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">OL</div>
+            <div class="traveler-info"><div class="traveler-name">Olivia Lee</div><div class="traveler-meta">Japan Cultural Studies</div></div>
+            <div class="traveler-location">Suginami, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:53 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">TC</div>
+            <div class="traveler-info"><div class="traveler-name">Thomas Chen</div><div class="traveler-meta">Asia Business Immersion</div></div>
+            <div class="traveler-location">Bunkyo, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:50 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">HR</div>
+            <div class="traveler-info"><div class="traveler-name">Hannah Rodriguez</div><div class="traveler-meta">Spring Tokyo Exchange</div></div>
+            <div class="traveler-location">Ota, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:47 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">NS</div>
+            <div class="traveler-info"><div class="traveler-name">Noah Singh</div><div class="traveler-meta">Japan Cultural Studies</div></div>
+            <div class="traveler-location">Edogawa, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:44 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">CM</div>
+            <div class="traveler-info"><div class="traveler-name">Chloe Martinez</div><div class="traveler-meta">Asia Business Immersion</div></div>
+            <div class="traveler-location">Koto, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:42 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">AB</div>
+            <div class="traveler-info"><div class="traveler-name">Alexander Brown</div><div class="traveler-meta">Spring Tokyo Exchange</div></div>
+            <div class="traveler-location">Taito, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:40 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">MY</div>
+            <div class="traveler-info"><div class="traveler-name">Mia Yamamoto</div><div class="traveler-meta">Japan Cultural Studies</div></div>
+            <div class="traveler-location">Nerima, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:38 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">EW</div>
+            <div class="traveler-info"><div class="traveler-name">Ethan Wright</div><div class="traveler-meta">Asia Business Immersion</div></div>
+            <div class="traveler-location">Adachi, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:36 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">IS</div>
+            <div class="traveler-info"><div class="traveler-name">Isabella Scott</div><div class="traveler-meta">Spring Tokyo Exchange</div></div>
+            <div class="traveler-location">Itabashi, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:35 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">WP</div>
+            <div class="traveler-info"><div class="traveler-name">William Park</div><div class="traveler-meta">Japan Cultural Studies</div></div>
+            <div class="traveler-location">Sumida, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:34 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">AD</div>
+            <div class="traveler-info"><div class="traveler-name">Amelia Davis</div><div class="traveler-meta">Asia Business Immersion</div></div>
+            <div class="traveler-location">Arakawa, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:34 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">LT</div>
+            <div class="traveler-info"><div class="traveler-name">Liam Taylor</div><div class="traveler-meta">Spring Tokyo Exchange</div></div>
+            <div class="traveler-location">Katsushika, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:33 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">GH</div>
+            <div class="traveler-info"><div class="traveler-name">Grace Hall</div><div class="traveler-meta">Japan Cultural Studies</div></div>
+            <div class="traveler-location">Chuo, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:33 JST</div>
+          </div>
+          <div class="traveler-row">
+            <div class="traveler-avatar" style="background:#2EBF14;">DO</div>
+            <div class="traveler-info"><div class="traveler-name">Daniel Okafor</div><div class="traveler-meta">Asia Business Immersion</div></div>
+            <div class="traveler-location">Shibuya, Tokyo</div>
+            <span class="badge badge-safe">&#10003; Safe</span>
+            <div class="traveler-checkin">14:33 JST</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-right">
+
+      <!-- Send SafeCheck -->
+      <div class="card">
+        <div class="card-header">Send SafeCheck</div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Message Template</label>
+            <select id="templateSelect" onchange="updatePreview()">
+              <option value="safety">Safety Check-In (Default)</option>
+              <option value="followup">Follow-Up Welfare Check</option>
+              <option value="evacuation">Evacuation Instructions</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Message Preview</label>
+            <textarea id="messagePreview" rows="4">Are you safe? Reply YES or tap the link below to confirm your safety status. If you need assistance, reply HELP.</textarea>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <button class="btn-primary" onclick="sendSafeCheck()">Send to 5 Unresponsive Travelers</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="card">
+        <div class="card-header">Incident Metrics</div>
+        <div class="card-body">
+          <div class="quick-stats">
+            <div class="stat-box">
+              <div class="val">2h 15m</div>
+              <div class="lbl">Since Incident</div>
+            </div>
+            <div class="stat-box">
+              <div class="val">4m</div>
+              <div class="lbl">Avg Response</div>
+            </div>
+            <div class="stat-box">
+              <div class="val">46</div>
+              <div class="lbl">Msgs Sent</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Communication Log -->
+      <div class="card" style="flex:1;">
+        <div class="card-header">Communication Log</div>
+        <div class="card-body comm-log">
+          <div class="log-entry">
+            <div class="log-time">16:47 JST</div>
+            <div class="log-msg"><span class="recv">Received:</span> Grace Hall confirmed safe via SMS</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">16:45 JST</div>
+            <div class="log-msg"><span class="sent">Sent:</span> Follow-up SafeCheck to 5 unresponsive travelers</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">16:42 JST</div>
+            <div class="log-msg"><span class="recv">Received:</span> Daniel Okafor confirmed safe via app</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">16:38 JST</div>
+            <div class="log-msg"><span class="recv">Received:</span> Sophie Nguyen reports minor injury, needs assistance</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">16:35 JST</div>
+            <div class="log-msg"><span class="sent">Sent:</span> SafeCheck to all 23 travelers in Tokyo region</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">16:30 JST</div>
+            <div class="log-msg"><span class="recv">Received:</span> Liam Taylor confirmed safe via SMS</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">16:22 JST</div>
+            <div class="log-msg"><span class="sent">Sent:</span> Emergency alert to program coordinators</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">16:15 JST</div>
+            <div class="log-msg"><span class="recv">Received:</span> Ryan Kim reports building damage, seeking shelter</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">14:55 JST</div>
+            <div class="log-msg"><span class="recv">Received:</span> James Miller confirmed safe via app</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">14:35 JST</div>
+            <div class="log-msg"><span class="sent">Sent:</span> Initial SafeCheck broadcast to all affected travelers</div>
+          </div>
+          <div class="log-entry">
+            <div class="log-time">14:32 JST</div>
+            <div class="log-msg"><span class="sent">Sent:</span> Incident auto-detected: Earthquake M6.2, Tokyo region</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Action Bar -->
+  <div class="action-bar">
+    <span style="flex:1; font-size:13px; color:#6B7280;">Incident #INC-2026-0847 &mdash; Opened Mar 13, 2026 at 14:32 JST</span>
+    <button class="btn btn-outline" onclick="sendFollowUp()">Send Follow-Up</button>
+    <button class="btn btn-outline" onclick="exportReport()">Export Incident Report</button>
+    <button class="btn btn-danger" onclick="showResolveModal()">Mark Resolved</button>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon">&#10003;</span>
+  <span id="toastMsg">Message sent to 5 unresponsive travelers</span>
+</div>
+
+<!-- Resolve Confirmation Modal -->
+<div class="modal-overlay" id="resolveModal">
+  <div class="modal">
+    <h3>Mark Incident as Resolved?</h3>
+    <p>This will close incident #INC-2026-0847 and notify all program coordinators. There are still <strong>5 travelers</strong> who have not responded. Are you sure you want to proceed?</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="hideResolveModal()">Cancel</button>
+      <button class="btn btn-danger" onclick="resolveIncident()">Yes, Mark Resolved</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showToast(msg) {
+    var toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 3500);
+  }
+
+  function sendSafeCheck() {
+    showToast('Message sent to 5 unresponsive travelers');
+  }
+
+  function sendFollowUp() {
+    showToast('Follow-up message sent to all affected travelers');
+  }
+
+  function exportReport() {
+    showToast('Incident report exported successfully');
+  }
+
+  function showResolveModal() {
+    document.getElementById('resolveModal').classList.add('show');
+  }
+
+  function hideResolveModal() {
+    document.getElementById('resolveModal').classList.remove('show');
+  }
+
+  function resolveIncident() {
+    hideResolveModal();
+    showToast('Incident #INC-2026-0847 marked as resolved');
+  }
+
+  function updatePreview() {
+    var sel = document.getElementById('templateSelect').value;
+    var preview = document.getElementById('messagePreview');
+    var templates = {
+      safety: 'Are you safe? Reply YES or tap the link below to confirm your safety status. If you need assistance, reply HELP.',
+      followup: 'We have not yet received your safety confirmation. Please reply YES if you are safe, or HELP if you need assistance. Your safety is our priority.',
+      evacuation: 'URGENT: Please evacuate to the nearest designated safe zone. Reply SAFE once you have reached safety. If you need immediate assistance, reply HELP or call the emergency line.'
+    };
+    preview.value = templates[sel] || templates.safety;
+  }
+
+  // Close modal on overlay click
+  document.getElementById('resolveModal').addEventListener('click', function(e) {
+    if (e.target === this) hideResolveModal();
+  });
+</script>
+
+</body>
+</html>

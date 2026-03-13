@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application Review Queue — Via TRM</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f5f5f7; color: #333; display: flex; height: 100vh; overflow: hidden; }
+
+  /* ---- Sidebar ---- */
+  .sidebar { width: 240px; min-width: 240px; background: #1A0B2E; color: #fff; display: flex; flex-direction: column; }
+  .sidebar-logo { padding: 24px 20px; font-size: 22px; font-weight: 700; letter-spacing: .5px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .sidebar-logo span { color: #E8107C; }
+  .sidebar nav { flex: 1; padding: 12px 0; }
+  .sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 11px 20px; color: rgba(255,255,255,.65); text-decoration: none; font-size: 14px; transition: background .15s, color .15s; }
+  .sidebar nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+  .sidebar nav a.active { background: rgba(232,16,124,.15); color: #E8107C; font-weight: 600; border-left: 3px solid #E8107C; }
+  .sidebar nav a .icon { width: 20px; text-align: center; font-size: 16px; }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.1); font-size: 13px; color: rgba(255,255,255,.45); }
+
+  /* ---- Main ---- */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* Top bar */
+  .topbar { background: #fff; padding: 20px 28px 16px; border-bottom: 1px solid #e0e0e0; }
+  .topbar h1 { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .filters select, .filters input[type="text"] {
+    padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 13px;
+    background: #fff; color: #333; min-width: 150px;
+  }
+  .filters input[type="text"] { min-width: 220px; }
+
+  /* Batch actions */
+  .batch-bar { display: flex; align-items: center; gap: 12px; padding: 12px 28px; background: #fafafa; border-bottom: 1px solid #e0e0e0; }
+  .batch-bar label { font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .batch-btn {
+    padding: 7px 14px; border: 1px solid #d0d0d0; border-radius: 6px; background: #f0f0f0;
+    font-size: 13px; color: #999; cursor: not-allowed; transition: all .15s;
+  }
+  .batch-btn.enabled { background: #E8107C; color: #fff; border-color: #E8107C; cursor: pointer; }
+  .batch-btn.enabled:hover { background: #c90c68; }
+  .batch-btn.enabled.secondary { background: #fff; color: #333; border-color: #d0d0d0; }
+  .batch-btn.enabled.secondary:hover { background: #f5f5f5; }
+
+  /* Content area */
+  .content-area { flex: 1; display: flex; overflow: hidden; }
+  .table-wrap { flex: 1; overflow-y: auto; padding: 0; }
+
+  /* Table */
+  .app-table { width: 100%; border-collapse: collapse; }
+  .app-table th { text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: #888; background: #fafafa; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 1; }
+  .app-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid #eee; vertical-align: middle; }
+  .app-table tr:hover td { background: #f8f4ff; }
+  .app-table td:first-child, .app-table th:first-child { padding-left: 28px; }
+  .app-table input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #E8107C; }
+
+  /* Status badges */
+  .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .badge-pending { background: #FFF3ED; color: #FD5A15; }
+  .badge-in-review { background: #EBF3FF; color: #026FFF; }
+  .badge-approved { background: #ECFAE9; color: #2EBF14; }
+  .badge-needs-info { background: #FFF8E1; color: #D4930D; }
+
+  .view-btn { padding: 6px 14px; border: 1px solid #d0d0d0; border-radius: 6px; background: #fff; font-size: 13px; cursor: pointer; color: #333; transition: all .15s; }
+  .view-btn:hover { border-color: #E8107C; color: #E8107C; }
+
+  /* ---- Detail Panel ---- */
+  .detail-panel {
+    width: 420px; min-width: 420px; background: #fff; border-left: 1px solid #e0e0e0;
+    display: none; flex-direction: column; overflow-y: auto;
+  }
+  .detail-panel.open { display: flex; }
+  .detail-header { padding: 20px 24px; border-bottom: 1px solid #eee; display: flex; align-items: flex-start; gap: 14px; }
+  .detail-close { margin-left: auto; background: none; border: none; font-size: 20px; cursor: pointer; color: #999; }
+  .detail-close:hover { color: #333; }
+  .avatar { width: 56px; height: 56px; border-radius: 50%; background: #ede4f7; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #7B47B5; flex-shrink: 0; }
+  .student-meta h3 { font-size: 16px; margin-bottom: 2px; }
+  .student-meta p { font-size: 13px; color: #777; line-height: 1.5; }
+
+  .detail-section { padding: 18px 24px; border-bottom: 1px solid #eee; }
+  .detail-section h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: #999; margin-bottom: 12px; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 20px; }
+  .timeline::before { content: ''; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: #e0e0e0; }
+  .timeline-step { position: relative; margin-bottom: 16px; }
+  .timeline-step:last-child { margin-bottom: 0; }
+  .timeline-dot { position: absolute; left: -20px; top: 2px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #d0d0d0; background: #fff; }
+  .timeline-step.done .timeline-dot { background: #2EBF14; border-color: #2EBF14; }
+  .timeline-step.active .timeline-dot { background: #026FFF; border-color: #026FFF; }
+  .timeline-label { font-size: 14px; font-weight: 500; }
+  .timeline-date { font-size: 12px; color: #999; }
+
+  /* Checklist */
+  .checklist-item { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 8px; }
+  .checklist-item .ck { width: 18px; height: 18px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .ck-done { background: #2EBF14; color: #fff; }
+  .ck-pending { background: #eee; color: #bbb; }
+
+  /* Messages */
+  .message { margin-bottom: 14px; }
+  .message:last-child { margin-bottom: 0; }
+  .msg-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .msg-author { font-size: 13px; font-weight: 600; }
+  .msg-time { font-size: 12px; color: #aaa; }
+  .msg-body { font-size: 13px; color: #555; line-height: 1.55; background: #f9f9f9; padding: 10px 12px; border-radius: 8px; }
+
+  /* Detail actions */
+  .detail-actions { padding: 18px 24px; display: flex; gap: 10px; margin-top: auto; border-top: 1px solid #eee; }
+  .btn { padding: 9px 18px; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: opacity .15s; }
+  .btn:hover { opacity: .85; }
+  .btn-approve { background: #2EBF14; color: #fff; }
+  .btn-deny { background: #E8107C; color: #fff; }
+  .btn-request-info { background: #fff; color: #333; border: 1px solid #d0d0d0; }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo"><span>Via</span> Global</div>
+  <nav>
+    <a href="#"><span class="icon">&#9632;</span> Dashboard</a>
+    <a href="#" class="active"><span class="icon">&#9998;</span> Applications</a>
+    <a href="#"><span class="icon">&#9733;</span> Programs</a>
+    <a href="#"><span class="icon">&#128101;</span> Students</a>
+    <a href="#"><span class="icon">&#128197;</span> Terms</a>
+    <a href="#"><span class="icon">&#128200;</span> Reports</a>
+    <a href="#"><span class="icon">&#9881;</span> Settings</a>
+  </nav>
+  <div class="sidebar-footer">Via TRM 2026</div>
+</aside>
+
+<!-- Main content -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <h1>Applications</h1>
+    <div class="filters">
+      <select><option>All Programs</option><option>Spain Language Immersion</option><option>Japan Cultural Exchange</option><option>UK Business Program</option><option>Italy Art &amp; Design</option></select>
+      <select><option>All Terms</option><option>Fall 2026</option><option>Spring 2027</option><option>Summer 2026</option></select>
+      <select><option>All Statuses</option><option>Pending Review</option><option>In Review</option><option>Approved</option><option>Needs Info</option></select>
+      <select><option>All Reviewers</option><option>Sarah Chen</option><option>Michael Torres</option><option>Unassigned</option></select>
+      <input type="text" placeholder="Search by student name or ID...">
+    </div>
+  </div>
+
+  <!-- Batch actions -->
+  <div class="batch-bar">
+    <label><input type="checkbox" id="selectAll"> Select All</label>
+    <button class="batch-btn" id="batchApprove">Approve Selected</button>
+    <button class="batch-btn" id="batchRequestInfo">Request Info</button>
+    <button class="batch-btn" id="batchAssign">Assign Reviewer</button>
+    <button class="batch-btn" id="batchExport">Export</button>
+    <span id="selectedCount" style="font-size:13px;color:#999;margin-left:auto;"></span>
+  </div>
+
+  <!-- Content area: table + detail panel -->
+  <div class="content-area">
+    <div class="table-wrap">
+      <table class="app-table">
+        <thead>
+          <tr>
+            <th style="width:40px;"></th>
+            <th>Student Name</th>
+            <th>Program</th>
+            <th>Term</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th>Reviewer</th>
+            <th style="width:80px;"></th>
+          </tr>
+        </thead>
+        <tbody id="appTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-header">
+        <div class="avatar" id="detailAvatar"></div>
+        <div class="student-meta">
+          <h3 id="detailName"></h3>
+          <p id="detailEmail"></p>
+          <p id="detailMajor"></p>
+        </div>
+        <button class="detail-close" id="detailClose">&times;</button>
+      </div>
+
+      <div class="detail-section">
+        <h4>Application Status</h4>
+        <div class="timeline" id="detailTimeline"></div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Submitted Documents</h4>
+        <div id="detailDocs"></div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Messages</h4>
+        <div id="detailMessages"></div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn btn-approve">Approve</button>
+        <button class="btn btn-deny">Deny</button>
+        <button class="btn btn-request-info">Request Info</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function() {
+  var applications = [
+    { id:1, name:"Emily Rodriguez", initials:"ER", email:"e.rodriguez@university.edu", major:"International Relations", program:"Spain Language Immersion", term:"Fall 2026", status:"pending", submitted:"Feb 28, 2026", reviewer:"Sarah Chen",
+      timeline:[{label:"Submitted",date:"Feb 28, 2026",state:"done"},{label:"Under Review",date:"",state:""},{label:"Decision",date:"",state:""}],
+      docs:[{name:"Transcript",done:true},{name:"Personal Statement",done:true},{name:"Faculty Recommendation",done:false}],
+      messages:[
+        {author:"Sarah Chen",time:"Mar 2, 2026 10:15 AM",body:"Application looks complete. I will begin reviewing the academic record this week."},
+        {author:"System",time:"Feb 28, 2026 3:42 PM",body:"Application submitted successfully. All required fields completed."}
+      ]
+    },
+    { id:2, name:"James Nakamura", initials:"JN", email:"j.nakamura@university.edu", major:"East Asian Studies", program:"Japan Cultural Exchange", term:"Fall 2026", status:"in-review", submitted:"Feb 25, 2026", reviewer:"Michael Torres",
+      timeline:[{label:"Submitted",date:"Feb 25, 2026",state:"done"},{label:"Under Review",date:"Mar 1, 2026",state:"active"},{label:"Decision",date:"",state:""}],
+      docs:[{name:"Transcript",done:true},{name:"Personal Statement",done:true},{name:"Language Proficiency Certificate",done:false}],
+      messages:[
+        {author:"Michael Torres",time:"Mar 5, 2026 2:30 PM",body:"Strong application overall. Waiting on JLPT score verification before we can proceed."},
+        {author:"James Nakamura",time:"Mar 4, 2026 9:00 AM",body:"I have requested my JLPT scores be sent directly. They should arrive within the week."}
+      ]
+    },
+    { id:3, name:"Aisha Patel", initials:"AP", email:"a.patel@university.edu", major:"Business Administration", program:"UK Business Program", term:"Spring 2027", status:"approved", submitted:"Feb 15, 2026", reviewer:"Sarah Chen",
+      timeline:[{label:"Submitted",date:"Feb 15, 2026",state:"done"},{label:"Under Review",date:"Feb 20, 2026",state:"done"},{label:"Decision",date:"Mar 8, 2026",state:"done"}],
+      docs:[{name:"Transcript",done:true},{name:"Resume",done:true},{name:"Letter of Intent",done:true}],
+      messages:[
+        {author:"Sarah Chen",time:"Mar 8, 2026 11:00 AM",body:"Application approved. Excellent academic record and strong statement of purpose."},
+        {author:"System",time:"Mar 8, 2026 11:00 AM",body:"Status updated to Approved. Acceptance letter generated and queued for delivery."}
+      ]
+    },
+    { id:4, name:"Marcus Williams", initials:"MW", email:"m.williams@university.edu", major:"Art History", program:"Italy Art & Design", term:"Fall 2026", status:"needs-info", submitted:"Feb 20, 2026", reviewer:"Michael Torres",
+      timeline:[{label:"Submitted",date:"Feb 20, 2026",state:"done"},{label:"Under Review",date:"Feb 27, 2026",state:"active"},{label:"Decision",date:"",state:""}],
+      docs:[{name:"Transcript",done:true},{name:"Portfolio",done:false},{name:"Personal Statement",done:true}],
+      messages:[
+        {author:"Michael Torres",time:"Mar 3, 2026 4:15 PM",body:"Marcus, your portfolio link appears to be broken. Could you resubmit or provide an updated URL?"},
+        {author:"Marcus Williams",time:"Mar 4, 2026 8:22 AM",body:"Sorry about that! I will upload a new version by end of day today."}
+      ]
+    },
+    { id:5, name:"Sofia Andersson", initials:"SA", email:"s.andersson@university.edu", major:"Environmental Science", program:"Spain Language Immersion", term:"Spring 2027", status:"pending", submitted:"Mar 1, 2026", reviewer:"Unassigned",
+      timeline:[{label:"Submitted",date:"Mar 1, 2026",state:"done"},{label:"Under Review",date:"",state:""},{label:"Decision",date:"",state:""}],
+      docs:[{name:"Transcript",done:true},{name:"Personal Statement",done:true},{name:"Language Assessment",done:false}],
+      messages:[
+        {author:"System",time:"Mar 1, 2026 1:10 PM",body:"Application submitted successfully. Awaiting reviewer assignment."}
+      ]
+    },
+    { id:6, name:"David Kim", initials:"DK", email:"d.kim@university.edu", major:"Computer Science", program:"Japan Cultural Exchange", term:"Summer 2026", status:"in-review", submitted:"Feb 10, 2026", reviewer:"Sarah Chen",
+      timeline:[{label:"Submitted",date:"Feb 10, 2026",state:"done"},{label:"Under Review",date:"Feb 18, 2026",state:"active"},{label:"Decision",date:"",state:""}],
+      docs:[{name:"Transcript",done:true},{name:"Personal Statement",done:true},{name:"Faculty Recommendation",done:true}],
+      messages:[
+        {author:"Sarah Chen",time:"Mar 6, 2026 9:45 AM",body:"Reviewing David's application now. Strong technical background and good cultural awareness in the essay."},
+        {author:"System",time:"Feb 18, 2026 10:00 AM",body:"Application moved to Under Review. Assigned to Sarah Chen."}
+      ]
+    },
+    { id:7, name:"Rachel Thompson", initials:"RT", email:"r.thompson@university.edu", major:"Political Science", program:"UK Business Program", term:"Fall 2026", status:"pending", submitted:"Mar 5, 2026", reviewer:"Unassigned",
+      timeline:[{label:"Submitted",date:"Mar 5, 2026",state:"done"},{label:"Under Review",date:"",state:""},{label:"Decision",date:"",state:""}],
+      docs:[{name:"Transcript",done:true},{name:"Resume",done:false},{name:"Letter of Intent",done:true}],
+      messages:[
+        {author:"System",time:"Mar 5, 2026 5:30 PM",body:"Application submitted. Resume flagged as incomplete -- missing work experience section."}
+      ]
+    },
+    { id:8, name:"Lucas Moreno", initials:"LM", email:"l.moreno@university.edu", major:"Fine Arts", program:"Italy Art & Design", term:"Spring 2027", status:"approved", submitted:"Feb 5, 2026", reviewer:"Michael Torres",
+      timeline:[{label:"Submitted",date:"Feb 5, 2026",state:"done"},{label:"Under Review",date:"Feb 12, 2026",state:"done"},{label:"Decision",date:"Mar 1, 2026",state:"done"}],
+      docs:[{name:"Transcript",done:true},{name:"Portfolio",done:true},{name:"Personal Statement",done:true}],
+      messages:[
+        {author:"Michael Torres",time:"Mar 1, 2026 3:00 PM",body:"Exceptional portfolio. One of the strongest art applicants this cycle. Approved with high recommendation."},
+        {author:"System",time:"Mar 1, 2026 3:00 PM",body:"Status updated to Approved. Acceptance letter generated and queued for delivery."}
+      ]
+    }
+  ];
+
+  var statusLabels = {"pending":"Pending Review","in-review":"In Review","approved":"Approved","needs-info":"Needs Info"};
+  var statusClasses = {"pending":"badge-pending","in-review":"badge-in-review","approved":"badge-approved","needs-info":"badge-needs-info"};
+
+  // Build table rows using DOM methods
+  var tbody = document.getElementById('appTableBody');
+  applications.forEach(function(app) {
+    var tr = document.createElement('tr');
+
+    // Checkbox cell
+    var tdCb = document.createElement('td');
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'row-check';
+    cb.setAttribute('data-id', app.id);
+    tdCb.appendChild(cb);
+    tr.appendChild(tdCb);
+
+    // Student Name
+    var tdName = document.createElement('td');
+    tdName.style.fontWeight = '500';
+    tdName.textContent = app.name;
+    tr.appendChild(tdName);
+
+    // Program
+    var tdProg = document.createElement('td');
+    tdProg.textContent = app.program;
+    tr.appendChild(tdProg);
+
+    // Term
+    var tdTerm = document.createElement('td');
+    tdTerm.textContent = app.term;
+    tr.appendChild(tdTerm);
+
+    // Status badge
+    var tdStatus = document.createElement('td');
+    var badge = document.createElement('span');
+    badge.className = 'badge ' + statusClasses[app.status];
+    badge.textContent = statusLabels[app.status];
+    tdStatus.appendChild(badge);
+    tr.appendChild(tdStatus);
+
+    // Submitted
+    var tdSub = document.createElement('td');
+    tdSub.style.color = '#777';
+    tdSub.textContent = app.submitted;
+    tr.appendChild(tdSub);
+
+    // Reviewer
+    var tdRev = document.createElement('td');
+    tdRev.style.color = app.reviewer === 'Unassigned' ? '#bbb' : '#555';
+    tdRev.textContent = app.reviewer;
+    tr.appendChild(tdRev);
+
+    // View button
+    var tdAct = document.createElement('td');
+    var viewBtn = document.createElement('button');
+    viewBtn.className = 'view-btn';
+    viewBtn.setAttribute('data-id', app.id);
+    viewBtn.textContent = 'View';
+    tdAct.appendChild(viewBtn);
+    tr.appendChild(tdAct);
+
+    tbody.appendChild(tr);
+  });
+
+  // Checkbox / batch actions logic
+  var batchBtns = document.querySelectorAll('.batch-btn');
+  var selectAll = document.getElementById('selectAll');
+  var selectedCount = document.getElementById('selectedCount');
+
+  function getRowChecks() {
+    return document.querySelectorAll('.row-check');
+  }
+
+  function updateBatch() {
+    var rowChecks = getRowChecks();
+    var checked = document.querySelectorAll('.row-check:checked');
+    var any = checked.length > 0;
+    for (var i = 0; i < batchBtns.length; i++) {
+      var btn = batchBtns[i];
+      if (any) {
+        btn.classList.add('enabled');
+        if (btn.id !== 'batchApprove') btn.classList.add('secondary');
+      } else {
+        btn.classList.remove('enabled', 'secondary');
+      }
+    }
+    selectedCount.textContent = any ? checked.length + ' selected' : '';
+    selectAll.checked = checked.length === rowChecks.length && rowChecks.length > 0;
+  }
+
+  selectAll.addEventListener('change', function() {
+    var rowChecks = getRowChecks();
+    for (var i = 0; i < rowChecks.length; i++) {
+      rowChecks[i].checked = selectAll.checked;
+    }
+    updateBatch();
+  });
+
+  tbody.addEventListener('change', function(e) {
+    if (e.target && e.target.classList.contains('row-check')) {
+      updateBatch();
+    }
+  });
+
+  // View detail panel
+  tbody.addEventListener('click', function(e) {
+    var btn = e.target;
+    if (btn && btn.classList.contains('view-btn')) {
+      e.stopPropagation();
+      var id = parseInt(btn.getAttribute('data-id'), 10);
+      var app = null;
+      for (var i = 0; i < applications.length; i++) {
+        if (applications[i].id === id) { app = applications[i]; break; }
+      }
+      if (app) openDetail(app);
+    }
+  });
+
+  function openDetail(app) {
+    var panel = document.getElementById('detailPanel');
+
+    document.getElementById('detailAvatar').textContent = app.initials;
+    document.getElementById('detailName').textContent = app.name;
+    document.getElementById('detailEmail').textContent = app.email;
+    document.getElementById('detailMajor').textContent = app.major;
+
+    // Timeline — build with DOM
+    var tl = document.getElementById('detailTimeline');
+    tl.textContent = '';
+    app.timeline.forEach(function(step) {
+      var div = document.createElement('div');
+      div.className = 'timeline-step' + (step.state ? ' ' + step.state : '');
+      var dot = document.createElement('div');
+      dot.className = 'timeline-dot';
+      var label = document.createElement('div');
+      label.className = 'timeline-label';
+      label.textContent = step.label;
+      var dateEl = document.createElement('div');
+      dateEl.className = 'timeline-date';
+      dateEl.textContent = step.date || 'Pending';
+      div.appendChild(dot);
+      div.appendChild(label);
+      div.appendChild(dateEl);
+      tl.appendChild(div);
+    });
+
+    // Documents — build with DOM
+    var docs = document.getElementById('detailDocs');
+    docs.textContent = '';
+    app.docs.forEach(function(d) {
+      var item = document.createElement('div');
+      item.className = 'checklist-item';
+      var ck = document.createElement('div');
+      ck.className = 'ck ' + (d.done ? 'ck-done' : 'ck-pending');
+      ck.textContent = d.done ? '\u2713' : '\u2014';
+      var span = document.createElement('span');
+      span.textContent = d.name;
+      item.appendChild(ck);
+      item.appendChild(span);
+      docs.appendChild(item);
+    });
+
+    // Messages — build with DOM
+    var msgs = document.getElementById('detailMessages');
+    msgs.textContent = '';
+    app.messages.forEach(function(m) {
+      var msg = document.createElement('div');
+      msg.className = 'message';
+      var header = document.createElement('div');
+      header.className = 'msg-header';
+      var author = document.createElement('span');
+      author.className = 'msg-author';
+      author.textContent = m.author;
+      var time = document.createElement('span');
+      time.className = 'msg-time';
+      time.textContent = m.time;
+      header.appendChild(author);
+      header.appendChild(time);
+      var body = document.createElement('div');
+      body.className = 'msg-body';
+      body.textContent = m.body;
+      msg.appendChild(header);
+      msg.appendChild(body);
+      msgs.appendChild(msg);
+    });
+
+    panel.classList.add('open');
+  }
+
+  document.getElementById('detailClose').addEventListener('click', function() {
+    document.getElementById('detailPanel').classList.remove('open');
+  });
+})();
+</script>
+</body>
+</html>

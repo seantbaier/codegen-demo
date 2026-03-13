@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Via Contracts — Agreements Dashboard</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #F3F4F6;
+      color: #1F2937;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: #1A0B2E;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-logo .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-logo .logo-text span {
+      color: #E8107C;
+    }
+
+    .sidebar-logo .logo-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 2px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav {
+      list-style: none;
+      padding: 12px 0;
+      flex: 1;
+    }
+
+    .sidebar-nav li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sidebar-nav li a:hover {
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+    }
+
+    .sidebar-nav li a.active {
+      background: rgba(232,16,124,0.15);
+      color: #fff;
+      border-left: 3px solid #E8107C;
+      padding-left: 17px;
+    }
+
+    .sidebar-nav li a .nav-icon {
+      width: 18px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ── Main content ── */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      padding: 28px 32px 80px;
+      min-width: 0;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1A0B2E;
+    }
+
+    .page-header .header-date {
+      font-size: 13px;
+      color: #6B7280;
+    }
+
+    /* ── Metric cards ── */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .metric-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .metric-icon.green  { background: rgba(46,191,20,0.12); color: #2EBF14; }
+    .metric-icon.orange { background: rgba(253,90,21,0.12); color: #FD5A15; }
+    .metric-icon.red    { background: rgba(220,38,38,0.12); color: #DC2626; }
+    .metric-icon.blue   { background: rgba(2,111,255,0.12); color: #026FFF; }
+
+    .metric-info .metric-value {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .metric-info .metric-label {
+      font-size: 13px;
+      color: #6B7280;
+      margin-top: 3px;
+    }
+
+    .metric-value.green  { color: #2EBF14; }
+    .metric-value.orange { color: #FD5A15; }
+    .metric-value.red    { color: #DC2626; }
+    .metric-value.blue   { color: #026FFF; }
+
+    /* ── Section panels ── */
+    .panel {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      padding: 22px 24px;
+      margin-bottom: 24px;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1A0B2E;
+      margin-bottom: 18px;
+    }
+
+    /* ── Bar chart ── */
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .bar-label {
+      width: 130px;
+      text-align: right;
+      font-size: 13px;
+      color: #374151;
+      flex-shrink: 0;
+    }
+
+    .bar-track {
+      flex: 1;
+      height: 28px;
+      background: #F3F4F6;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      transition: width 0.5s ease;
+    }
+
+    .bar-fill.europe       { background: #026FFF; width: 100%; }
+    .bar-fill.asia         { background: #7C3AED; width: 56.25%; }
+    .bar-fill.latam        { background: #E8107C; width: 46.88%; }
+    .bar-fill.africa       { background: #FD5A15; width: 37.5%; }
+    .bar-fill.oceania      { background: #2EBF14; width: 31.25%; }
+
+    /* ── Content grid ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* ── Table ── */
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 600;
+      color: #6B7280;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #F3F4F6;
+    }
+
+    tbody td {
+      padding: 12px 12px;
+      border-bottom: 1px solid #F3F4F6;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background: #FAFAFA;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge.renewal-in-progress {
+      background: rgba(2,111,255,0.1);
+      color: #026FFF;
+    }
+
+    .badge.needs-renewal {
+      background: rgba(253,90,21,0.1);
+      color: #FD5A15;
+    }
+
+    .badge.expired {
+      background: rgba(220,38,38,0.1);
+      color: #DC2626;
+    }
+
+    .btn-sm {
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      background: #E8107C;
+      transition: opacity 0.15s;
+    }
+
+    .btn-sm:hover {
+      opacity: 0.85;
+    }
+
+    .exchange-balance {
+      font-size: 12px;
+      color: #374151;
+    }
+
+    /* ── Alerts ── */
+    .alert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      background: #FAFAFA;
+      border-left: 4px solid transparent;
+      font-size: 13px;
+      color: #374151;
+    }
+
+    .alert-item.orange {
+      border-left-color: #FD5A15;
+    }
+
+    .alert-item.red {
+      border-left-color: #DC2626;
+    }
+
+    .alert-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .alert-dot.orange { background: #FD5A15; }
+    .alert-dot.red    { background: #DC2626; }
+
+    .alert-item strong {
+      color: #1A0B2E;
+    }
+
+    /* ── FAB ── */
+    .fab {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #E8107C;
+      color: #fff;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(232,16,124,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+      z-index: 200;
+    }
+
+    .fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 20px rgba(232,16,124,0.5);
+    }
+
+    .fab-tooltip {
+      position: fixed;
+      bottom: 48px;
+      right: 96px;
+      background: #1A0B2E;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 200;
+    }
+
+    .fab-tooltip::after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 6px solid #1A0B2E;
+    }
+
+    .fab:hover + .fab-tooltip {
+      opacity: 1;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .metrics-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Via <span>Contracts</span></div>
+      <div class="logo-sub">Partnership Management</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="#" class="active"><span class="nav-icon">&#9632;</span> Dashboard</a></li>
+      <li><a href="#"><span class="nav-icon">&#9993;</span> Agreements</a></li>
+      <li><a href="#"><span class="nav-icon">&#9734;</span> Partners</a></li>
+      <li><a href="#"><span class="nav-icon">&#8644;</span> Exchange Balances</a></li>
+      <li><a href="#"><span class="nav-icon">&#8635;</span> Renewals</a></li>
+      <li><a href="#"><span class="nav-icon">&#9638;</span> Reports</a></li>
+      <li><a href="#"><span class="nav-icon">&#9881;</span> Settings</a></li>
+    </ul>
+    <div class="sidebar-footer">Via TRM &copy; 2026</div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div class="page-header">
+      <h1>Agreements Dashboard</h1>
+      <span class="header-date">March 13, 2026</span>
+    </div>
+
+    <!-- Metrics row -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-icon green">&#10003;</div>
+        <div class="metric-info">
+          <div class="metric-value green">87</div>
+          <div class="metric-label">Active Agreements</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon orange">&#9888;</div>
+        <div class="metric-info">
+          <div class="metric-value orange">12</div>
+          <div class="metric-label">Expiring in 90 Days</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon red">&#10005;</div>
+        <div class="metric-info">
+          <div class="metric-value red">3</div>
+          <div class="metric-label">Expired</div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-icon blue">&#9878;</div>
+        <div class="metric-info">
+          <div class="metric-value blue">94%</div>
+          <div class="metric-label">Parity Compliance</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content grid: Portfolio Overview + Expiring Soon -->
+    <div class="content-grid">
+
+      <!-- Portfolio Overview -->
+      <div class="panel">
+        <h2 class="panel-title">Portfolio Overview</h2>
+        <div class="bar-chart">
+          <div class="bar-row">
+            <span class="bar-label">Europe</span>
+            <div class="bar-track"><div class="bar-fill europe">32</div></div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Asia</span>
+            <div class="bar-track"><div class="bar-fill asia">18</div></div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Latin America</span>
+            <div class="bar-track"><div class="bar-fill latam">15</div></div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Africa</span>
+            <div class="bar-track"><div class="bar-fill africa">12</div></div>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Oceania</span>
+            <div class="bar-track"><div class="bar-fill oceania">10</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expiring Soon table -->
+      <div class="panel">
+        <h2 class="panel-title">Expiring Soon</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Partner</th>
+                <th>Country</th>
+                <th>Type</th>
+                <th>Expires</th>
+                <th>Exchange Balance</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Universit&eacute; de Lyon</strong></td>
+                <td>France</td>
+                <td>Exchange</td>
+                <td>Apr 15, 2026</td>
+                <td class="exchange-balance">Send: 12 / Receive: 8</td>
+                <td><span class="badge renewal-in-progress">Renewal In Progress</span></td>
+                <td><button class="btn-sm">View</button></td>
+              </tr>
+              <tr>
+                <td><strong>Yonsei University</strong></td>
+                <td>South Korea</td>
+                <td>Exchange</td>
+                <td>May 02, 2026</td>
+                <td class="exchange-balance">Send: 6 / Receive: 6</td>
+                <td><span class="badge renewal-in-progress">Renewal In Progress</span></td>
+                <td><button class="btn-sm">View</button></td>
+              </tr>
+              <tr>
+                <td><strong>Universidad de Chile</strong></td>
+                <td>Chile</td>
+                <td>MOU</td>
+                <td>May 20, 2026</td>
+                <td class="exchange-balance">Send: 4 / Receive: 3</td>
+                <td><span class="badge needs-renewal">Needs Renewal</span></td>
+                <td><button class="btn-sm">View</button></td>
+              </tr>
+              <tr>
+                <td><strong>University of Cape Town</strong></td>
+                <td>South Africa</td>
+                <td>Exchange</td>
+                <td>Apr 12, 2026</td>
+                <td class="exchange-balance">Send: 9 / Receive: 7</td>
+                <td><span class="badge needs-renewal">Needs Renewal</span></td>
+                <td><button class="btn-sm">View</button></td>
+              </tr>
+              <tr>
+                <td><strong>Politecnico di Milano</strong></td>
+                <td>Italy</td>
+                <td>Affiliation</td>
+                <td>Mar 01, 2026</td>
+                <td class="exchange-balance">Send: 5 / Receive: 5</td>
+                <td><span class="badge expired">Expired</span></td>
+                <td><button class="btn-sm">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Exchange Balance Alerts -->
+    <div class="panel">
+      <h2 class="panel-title">Exchange Balance Alerts</h2>
+      <div class="alert-list">
+        <div class="alert-item orange">
+          <span class="alert-dot orange"></span>
+          <span><strong>Universidad de Barcelona</strong> &mdash; Send balance approaching cap (18/20)</span>
+        </div>
+        <div class="alert-item red">
+          <span class="alert-dot red"></span>
+          <span><strong>Tokyo University</strong> &mdash; Parity imbalance (Send: 15, Receive: 8)</span>
+        </div>
+        <div class="alert-item red">
+          <span class="alert-dot red"></span>
+          <span><strong>University of Cape Town</strong> &mdash; Agreement expires in 30 days, no renewal initiated</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FAB -->
+  <button class="fab" aria-label="New Agreement">+</button>
+  <div class="fab-tooltip">New Agreement</div>
+
+</body>
+</html>

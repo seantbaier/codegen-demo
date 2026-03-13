@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spain Language Immersion - Barcelona | Via TRM</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: #333;
+      background: #f8f8fa;
+      line-height: 1.6;
+    }
+
+    /* ── Top Nav Bar ── */
+    .top-nav {
+      background: #1A0B2E;
+      padding: 14px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .top-nav-logo {
+      color: #fff;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .top-nav-logo span {
+      color: #E8107C;
+    }
+
+    .top-nav-links {
+      display: flex;
+      gap: 28px;
+    }
+
+    .top-nav-links a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .top-nav-links a:hover {
+      color: #fff;
+    }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb {
+      background: #fff;
+      border-bottom: 1px solid #e8e8ee;
+      padding: 12px 40px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .breadcrumb a {
+      color: #E8107C;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    .breadcrumb span {
+      margin: 0 8px;
+      color: #bbb;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative;
+      background: linear-gradient(135deg, #1A0B2E 0%, #3a1a6e 60%, #E8107C 100%);
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .hero-image-placeholder {
+      width: 100%;
+      height: 340px;
+      background: linear-gradient(135deg, rgba(26, 11, 46, 0.7), rgba(232, 16, 124, 0.4)),
+                  linear-gradient(45deg, #1A0B2E 25%, #3a1a6e 50%, #E8107C 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .hero-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 40px 40px 32px;
+      background: linear-gradient(to top, rgba(26, 11, 46, 0.95) 0%, rgba(26, 11, 46, 0.6) 60%, transparent 100%);
+    }
+
+    .hero-provider {
+      color: #E8107C;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+    }
+
+    .hero-title {
+      color: #fff;
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 14px;
+    }
+
+    .hero-stat-icon {
+      width: 18px;
+      height: 18px;
+      fill: #E8107C;
+    }
+
+    .hero-stat strong {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* ── Main Layout ── */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 40px 80px;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+    }
+
+    .sidebar-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(26, 11, 46, 0.08);
+      padding: 28px 24px;
+      border: 1px solid #eeecf2;
+    }
+
+    .btn-apply {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: #E8107C;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-apply:hover {
+      background: #d00e6f;
+      transform: translateY(-1px);
+    }
+
+    .btn-apply:active {
+      transform: translateY(0);
+    }
+
+    .sidebar-details {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-detail {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f0eff4;
+    }
+
+    .sidebar-detail:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .sidebar-detail-label {
+      font-size: 13px;
+      color: #888;
+      font-weight: 500;
+    }
+
+    .sidebar-detail-value {
+      font-size: 14px;
+      color: #1A0B2E;
+      font-weight: 600;
+    }
+
+    .btn-favorite {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      background: #fff;
+      color: #1A0B2E;
+      border: 2px solid #eeecf2;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 20px;
+    }
+
+    .btn-favorite:hover {
+      border-color: #E8107C;
+      color: #E8107C;
+    }
+
+    .btn-favorite.active {
+      background: #fef0f6;
+      border-color: #E8107C;
+      color: #E8107C;
+    }
+
+    .btn-favorite .heart {
+      font-size: 18px;
+      transition: transform 0.2s;
+    }
+
+    .btn-favorite.active .heart {
+      transform: scale(1.2);
+    }
+
+    /* ── Tabs ── */
+    .tabs-nav {
+      display: flex;
+      gap: 4px;
+      background: #fff;
+      border-radius: 14px;
+      padding: 6px;
+      box-shadow: 0 2px 12px rgba(26, 11, 46, 0.06);
+      border: 1px solid #eeecf2;
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: #1A0B2E;
+      background: #f8f8fa;
+    }
+
+    .tab-btn.active {
+      background: #1A0B2E;
+      color: #fff;
+    }
+
+    /* ── Tab Content ── */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .content-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px rgba(26, 11, 46, 0.06);
+      border: 1px solid #eeecf2;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    .content-card h2 {
+      color: #1A0B2E;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+
+    .content-card h3 {
+      color: #1A0B2E;
+      font-size: 17px;
+      font-weight: 700;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+
+    .content-card p {
+      color: #555;
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .content-card ul {
+      color: #555;
+      font-size: 15px;
+      line-height: 1.8;
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    .content-card ul li {
+      margin-bottom: 4px;
+    }
+
+    .highlight-box {
+      background: linear-gradient(135deg, #fef0f6 0%, #f5f0ff 100%);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 20px 0;
+      border-left: 4px solid #E8107C;
+    }
+
+    .highlight-box p {
+      color: #1A0B2E;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    /* ── Course Table ── */
+    .course-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+    }
+
+    .course-table th {
+      text-align: left;
+      padding: 12px 16px;
+      background: #f8f8fa;
+      color: #1A0B2E;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 2px solid #eeecf2;
+    }
+
+    .course-table td {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #555;
+      border-bottom: 1px solid #f0eff4;
+    }
+
+    .course-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-pink {
+      background: #fef0f6;
+      color: #E8107C;
+    }
+
+    .badge-purple {
+      background: #f5f0ff;
+      color: #6b3fa0;
+    }
+
+    /* ── Cost Breakdown ── */
+    .cost-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .cost-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #f8f8fa;
+      border-radius: 10px;
+    }
+
+    .cost-item-label {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .cost-item-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1A0B2E;
+    }
+
+    .included-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    .included-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .included-item .check {
+      color: #2ecc71;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .included-item .cross {
+      color: #e74c3c;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    /* ── FAQs ── */
+    .faq-item {
+      border-bottom: 1px solid #f0eff4;
+    }
+
+    .faq-item:last-child {
+      border-bottom: none;
+    }
+
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .faq-question h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1A0B2E;
+    }
+
+    .faq-question .arrow {
+      font-size: 18px;
+      color: #bbb;
+      transition: transform 0.25s;
+    }
+
+    .faq-item.open .faq-question .arrow {
+      transform: rotate(180deg);
+      color: #E8107C;
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .faq-answer-inner {
+      padding: 0 0 18px;
+      font-size: 14px;
+      color: #666;
+      line-height: 1.7;
+    }
+
+    /* ── Testimonial ── */
+    .testimonial {
+      background: linear-gradient(135deg, #1A0B2E 0%, #2d1550 100%);
+      border-radius: 16px;
+      padding: 36px 32px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .testimonial::before {
+      content: "\201C";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      font-size: 120px;
+      color: rgba(232, 16, 124, 0.15);
+      font-family: Georgia, serif;
+      line-height: 1;
+    }
+
+    .testimonial blockquote {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 17px;
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .testimonial-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #E8107C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .testimonial-name {
+      color: #fff;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .testimonial-details {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 13px;
+    }
+
+    /* ── CTA Section ── */
+    .cta-section {
+      background: linear-gradient(135deg, #1A0B2E 0%, #3a1a6e 50%, #E8107C 100%);
+      border-radius: 20px;
+      padding: 56px 40px;
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .cta-section h2 {
+      color: #fff;
+      font-size: 30px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .cta-section p {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 16px;
+      margin-bottom: 28px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-cta {
+      display: inline-block;
+      padding: 16px 40px;
+      background: #fff;
+      color: #E8107C;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: #1A0B2E;
+      padding: 32px 40px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 13px;
+      margin-top: 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+        padding: 24px 20px 60px;
+      }
+
+      .sidebar {
+        position: static;
+        order: -1;
+      }
+
+      .hero-title {
+        font-size: 26px;
+      }
+
+      .hero-content {
+        padding: 24px 20px;
+      }
+
+      .tabs-nav {
+        overflow-x: auto;
+      }
+
+      .cost-grid,
+      .included-list {
+        grid-template-columns: 1fr;
+      }
+
+      .breadcrumb,
+      .top-nav {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Nav -->
+  <nav class="top-nav">
+    <div class="top-nav-logo">Via <span>TRM</span></div>
+    <div class="top-nav-links">
+      <a href="#">Programs</a>
+      <a href="#">My Applications</a>
+      <a href="#">Resources</a>
+      <a href="#">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="#">Programs</a>
+    <span>&rsaquo;</span>
+    <a href="#">Spain</a>
+    <span>&rsaquo;</span>
+    Spain Language Immersion &mdash; Barcelona
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-image-placeholder">
+      &#9634; Program Photo &mdash; Barcelona, Spain
+    </div>
+    <div class="hero-content">
+      <div class="hero-provider">Global Education Partners</div>
+      <h1 class="hero-title">Spain Language Immersion &mdash; Barcelona</h1>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <svg class="hero-stat-icon" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>
+          <span>Location: <strong>Barcelona, Spain</strong></span>
+        </div>
+        <div class="hero-stat">
+          <svg class="hero-stat-icon" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+          <span>Duration: <strong>Semester</strong></span>
+        </div>
+        <div class="hero-stat">
+          <svg class="hero-stat-icon" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+          <span>Cost: <strong>$14,500</strong></span>
+        </div>
+        <div class="hero-stat">
+          <svg class="hero-stat-icon" viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg>
+          <span>Credits: <strong>12&ndash;16</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="main-layout">
+    <main>
+      <!-- Tabs Navigation -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="overview">Overview</button>
+        <button class="tab-btn" data-tab="academics">Academics</button>
+        <button class="tab-btn" data-tab="housing">Housing &amp; Life</button>
+        <button class="tab-btn" data-tab="costs">Costs &amp; Aid</button>
+        <button class="tab-btn" data-tab="faqs">FAQs</button>
+      </div>
+
+      <!-- Overview Tab -->
+      <div class="tab-content active" id="tab-overview">
+        <div class="content-card">
+          <h2>Program Overview</h2>
+          <p>
+            Immerse yourself in the vibrant culture of Barcelona while advancing your Spanish language skills. This semester-long program combines rigorous academic coursework with hands-on cultural experiences, placing you in the heart of one of Europe's most dynamic cities.
+          </p>
+          <p>
+            Designed for students at the intermediate level and above, the Spain Language Immersion program offers an unparalleled opportunity to achieve near-fluency through daily interaction with native speakers, university-level classes taught entirely in Spanish, and a carefully curated series of cultural excursions.
+          </p>
+
+          <div class="highlight-box">
+            <p>Students who complete this program report an average 2-level improvement on the ACTFL proficiency scale and a 94% satisfaction rating.</p>
+          </div>
+
+          <h3>Program Highlights</h3>
+          <ul>
+            <li>Enroll directly in courses at the Universitat de Barcelona alongside local students</li>
+            <li>Live with a carefully selected Spanish host family for full cultural immersion</li>
+            <li>Weekly conversation exchange (intercambio) sessions with local university students</li>
+            <li>Guided excursions to Madrid, Seville, and the Costa Brava</li>
+            <li>Intensive orientation week including survival Spanish, city navigation, and cultural workshops</li>
+            <li>Access to on-site resident director and 24/7 emergency support</li>
+          </ul>
+
+          <h3>What Makes This Program Unique</h3>
+          <p>
+            Unlike many study abroad programs that group international students together, our Barcelona immersion places you directly into the local university system. Combined with a host family stay and our language pledge program, you will use Spanish as your primary language from day one. Our small cohort size (maximum 25 students) ensures personalized academic advising and a tight-knit community while still encouraging independence and exploration.
+          </p>
+        </div>
+
+        <!-- Testimonial -->
+        <div class="testimonial">
+          <blockquote>
+            "This program completely transformed my Spanish. By the end of the semester, I was dreaming in Spanish and could hold my own in fast-paced conversations with my host family. The excursions were incredible, but honestly the everyday moments &mdash; shopping at La Boqueria, chatting with neighbors &mdash; were what made this experience unforgettable."
+          </blockquote>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">SR</div>
+            <div>
+              <div class="testimonial-name">Sofia Rodriguez</div>
+              <div class="testimonial-details">Fall 2025 Participant &middot; University of Michigan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Academics Tab -->
+      <div class="tab-content" id="tab-academics">
+        <div class="content-card">
+          <h2>Available Courses</h2>
+          <p>All courses are taught in Spanish at the Universitat de Barcelona. Students typically enroll in 4&ndash;5 courses per semester for a total of 12&ndash;16 credits.</p>
+
+          <table class="course-table">
+            <thead>
+              <tr>
+                <th>Course</th>
+                <th>Credits</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Advanced Spanish Composition</td>
+                <td>4</td>
+                <td><span class="badge badge-pink">Language</span></td>
+              </tr>
+              <tr>
+                <td>Spanish Phonetics &amp; Pronunciation</td>
+                <td>3</td>
+                <td><span class="badge badge-pink">Language</span></td>
+              </tr>
+              <tr>
+                <td>Contemporary Spanish Literature</td>
+                <td>3</td>
+                <td><span class="badge badge-purple">Humanities</span></td>
+              </tr>
+              <tr>
+                <td>History of Catalonia</td>
+                <td>3</td>
+                <td><span class="badge badge-purple">Humanities</span></td>
+              </tr>
+              <tr>
+                <td>Mediterranean Economics</td>
+                <td>3</td>
+                <td><span class="badge badge-purple">Social Science</span></td>
+              </tr>
+              <tr>
+                <td>Art &amp; Architecture of Barcelona</td>
+                <td>3</td>
+                <td><span class="badge badge-purple">Humanities</span></td>
+              </tr>
+              <tr>
+                <td>Business Spanish</td>
+                <td>3</td>
+                <td><span class="badge badge-pink">Language</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Credit Transfer</h3>
+          <p>
+            Credits earned through the Universitat de Barcelona are fully transferable. Our academic team works directly with your home institution's registrar to ensure seamless credit transfer. A transcript is issued within 6 weeks of program completion.
+          </p>
+
+          <div class="highlight-box">
+            <p>98% of students successfully transfer all earned credits to their home institution. Pre-approval forms are available during the application process.</p>
+          </div>
+
+          <h3>Language Requirements</h3>
+          <p>
+            Applicants must have completed at least 4 semesters of college-level Spanish (or equivalent) and demonstrate intermediate proficiency. A language assessment will be administered during the application review process to ensure proper course placement.
+          </p>
+        </div>
+      </div>
+
+      <!-- Housing & Life Tab -->
+      <div class="tab-content" id="tab-housing">
+        <div class="content-card">
+          <h2>Housing Options</h2>
+
+          <h3>Host Family (Recommended)</h3>
+          <p>
+            Live with a carefully vetted Spanish host family in a private room. Host families provide two meals per day (breakfast and dinner) and offer an authentic window into daily Spanish life. All families are located within 30 minutes of the university by public transit.
+          </p>
+
+          <h3>Shared Student Apartment</h3>
+          <p>
+            Share a furnished apartment in the Eixample or Gracia neighborhoods with 2&ndash;3 other program participants. Apartments include a full kitchen, shared living space, and Wi-Fi. A meal stipend of $150/month is provided in lieu of host family meals.
+          </p>
+
+          <div class="highlight-box">
+            <p>85% of past participants chose the host family option and rated it as the single most impactful element of their immersion experience.</p>
+          </div>
+
+          <h3>Meals</h3>
+          <ul>
+            <li><strong>Host Family:</strong> Breakfast and dinner daily, plus a weekend lunch</li>
+            <li><strong>Apartment:</strong> $150/month meal stipend; students prepare their own meals</li>
+            <li>Lunch is not included &mdash; students explore Barcelona's abundant and affordable food scene</li>
+          </ul>
+
+          <h3>Local Culture &amp; Daily Life</h3>
+          <p>
+            Barcelona is a walkable, transit-friendly city with a rich cultural calendar. Students enjoy a T-Jove transit pass (included in program fees), easy access to beaches, world-class museums, and a thriving food scene. The city is safe, welcoming, and endlessly explorable.
+          </p>
+          <ul>
+            <li>Public transit pass included (metro, bus, tram)</li>
+            <li>Average student lunch cost: $8&ndash;$12</li>
+            <li>Students are encouraged to join local clubs, sports teams, and volunteer organizations</li>
+            <li>Weekend travel to other European cities is easy and affordable via budget airlines and trains</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Costs & Aid Tab -->
+      <div class="tab-content" id="tab-costs">
+        <div class="content-card">
+          <h2>Cost Breakdown</h2>
+
+          <div class="cost-grid">
+            <div class="cost-item">
+              <span class="cost-item-label">Tuition &amp; Fees</span>
+              <span class="cost-item-value">$8,200</span>
+            </div>
+            <div class="cost-item">
+              <span class="cost-item-label">Housing</span>
+              <span class="cost-item-value">$3,800</span>
+            </div>
+            <div class="cost-item">
+              <span class="cost-item-label">Excursions</span>
+              <span class="cost-item-value">$1,200</span>
+            </div>
+            <div class="cost-item">
+              <span class="cost-item-label">Insurance &amp; Support</span>
+              <span class="cost-item-value">$800</span>
+            </div>
+            <div class="cost-item">
+              <span class="cost-item-label">Orientation &amp; Materials</span>
+              <span class="cost-item-value">$500</span>
+            </div>
+            <div class="cost-item">
+              <span class="cost-item-label" style="font-weight:700;color:#1A0B2E;">Total Program Cost</span>
+              <span class="cost-item-value" style="color:#E8107C;font-size:16px;">$14,500</span>
+            </div>
+          </div>
+
+          <h3>What's Included</h3>
+          <div class="included-list">
+            <div class="included-item"><span class="check">&#10003;</span> Tuition at Universitat de Barcelona</div>
+            <div class="included-item"><span class="check">&#10003;</span> Housing (host family or apartment)</div>
+            <div class="included-item"><span class="check">&#10003;</span> Meals (host family plan)</div>
+            <div class="included-item"><span class="check">&#10003;</span> Public transit pass</div>
+            <div class="included-item"><span class="check">&#10003;</span> Three guided excursions</div>
+            <div class="included-item"><span class="check">&#10003;</span> Health &amp; travel insurance</div>
+            <div class="included-item"><span class="check">&#10003;</span> On-site resident director</div>
+            <div class="included-item"><span class="check">&#10003;</span> 24/7 emergency support</div>
+          </div>
+
+          <h3>What's Not Included</h3>
+          <div class="included-list">
+            <div class="included-item"><span class="cross">&#10007;</span> International airfare</div>
+            <div class="included-item"><span class="cross">&#10007;</span> Daily lunches</div>
+            <div class="included-item"><span class="cross">&#10007;</span> Personal travel &amp; entertainment</div>
+            <div class="included-item"><span class="cross">&#10007;</span> Visa fees (if applicable)</div>
+            <div class="included-item"><span class="cross">&#10007;</span> Course textbooks</div>
+            <div class="included-item"><span class="cross">&#10007;</span> Cell phone plan</div>
+          </div>
+
+          <h3>Financial Aid &amp; Scholarships</h3>
+          <p>
+            Most federal and institutional financial aid can be applied to this program. We also offer the following scholarship opportunities:
+          </p>
+          <ul>
+            <li><strong>Via TRM Global Learner Scholarship:</strong> $2,000 &mdash; merit-based, open to all applicants</li>
+            <li><strong>First-Generation Abroad Award:</strong> $1,500 &mdash; for first-generation college students</li>
+            <li><strong>Language Excellence Grant:</strong> $1,000 &mdash; for students with demonstrated language commitment</li>
+          </ul>
+
+          <div class="highlight-box">
+            <p>72% of our participants receive some form of financial aid or scholarship. Contact our advising team to discuss your options.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQs Tab -->
+      <div class="tab-content" id="tab-faqs">
+        <div class="content-card">
+          <h2>Frequently Asked Questions</h2>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <h4>Do I need to speak Spanish fluently to participate?</h4>
+              <span class="arrow">&#9662;</span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                No, fluency is not required. However, you should have an intermediate level of Spanish (typically 4 semesters of college-level coursework or equivalent). You will complete a language placement assessment as part of your application so we can ensure you are placed in appropriate courses.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <h4>Can I use my existing financial aid for this program?</h4>
+              <span class="arrow">&#9662;</span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                In most cases, yes. Federal financial aid (grants, loans, work-study) typically applies to approved study abroad programs. Contact your home institution's financial aid office early in the application process to confirm. We also offer program-specific scholarships.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <h4>What is the application timeline?</h4>
+              <span class="arrow">&#9662;</span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Applications for the fall semester open on January 15 and close on March 31. For the spring semester, applications open August 1 and close October 15. Decisions are communicated within 4 weeks of the deadline. Early applications are encouraged as spots are limited to 25 students.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <h4>Will my credits transfer to my home university?</h4>
+              <span class="arrow">&#9662;</span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Our program has established credit transfer agreements with over 200 U.S. institutions. During the application process, you will complete a pre-approval form with your academic advisor. Our team also provides direct support to ensure credits are accepted. Historically, 98% of credits are transferred successfully.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <h4>What happens in an emergency while I'm abroad?</h4>
+              <span class="arrow">&#9662;</span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Your safety is our top priority. The program includes 24/7 emergency support, comprehensive health and travel insurance, and an on-site resident director who lives in Barcelona. We also conduct a thorough safety orientation during your first week, covering local emergency services, the nearest hospital, and our emergency protocols.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-question" onclick="toggleFaq(this)">
+              <h4>Can I travel independently on weekends?</h4>
+              <span class="arrow">&#9662;</span>
+            </div>
+            <div class="faq-answer">
+              <div class="faq-answer-inner">
+                Yes. Students are free to travel on weekends and during program breaks. Barcelona is well connected by budget airlines, trains, and buses to destinations throughout Spain and Europe. We provide a travel planning workshop during orientation and ask only that you register your travel plans with the resident director for safety purposes.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Section -->
+      <section class="cta-section">
+        <h2>Ready to Apply?</h2>
+        <p>Take the first step toward your Barcelona adventure. Applications for Fall 2026 are now open.</p>
+        <a href="#" class="btn-cta">Start Your Application</a>
+      </section>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-card">
+        <button class="btn-apply">Apply Now</button>
+
+        <div class="sidebar-details">
+          <div class="sidebar-detail">
+            <span class="sidebar-detail-label">Program Dates</span>
+            <span class="sidebar-detail-value">Sep 2 &ndash; Dec 18, 2026</span>
+          </div>
+          <div class="sidebar-detail">
+            <span class="sidebar-detail-label">Application Deadline</span>
+            <span class="sidebar-detail-value" style="color:#E8107C;">Mar 31, 2026</span>
+          </div>
+          <div class="sidebar-detail">
+            <span class="sidebar-detail-label">Spots Remaining</span>
+            <span class="sidebar-detail-value">8 of 25</span>
+          </div>
+          <div class="sidebar-detail">
+            <span class="sidebar-detail-label">Program Type</span>
+            <span class="sidebar-detail-value">Semester</span>
+          </div>
+          <div class="sidebar-detail">
+            <span class="sidebar-detail-label">Language</span>
+            <span class="sidebar-detail-value">Spanish</span>
+          </div>
+        </div>
+
+        <button class="btn-favorite" id="favoriteBtn" onclick="toggleFavorite()">
+          <span class="heart" id="heartIcon">&#9825;</span>
+          <span id="favText">Save to Favorites</span>
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    Via TRM &mdash; Empowering Global Education &middot; &copy; 2026 Via TRM. All rights reserved.
+  </footer>
+
+  <script>
+    // ── Tab Switching ──
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b) {
+          b.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(function(c) {
+          c.classList.remove('active');
+        });
+        btn.classList.add('active');
+        var tabId = 'tab-' + btn.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+
+    // ── FAQ Expand/Collapse ──
+    function toggleFaq(questionEl) {
+      var item = questionEl.parentElement;
+      var answer = item.querySelector('.faq-answer');
+      var isOpen = item.classList.contains('open');
+
+      if (isOpen) {
+        answer.style.maxHeight = null;
+        item.classList.remove('open');
+      } else {
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        item.classList.add('open');
+      }
+    }
+
+    // ── Favorite Toggle ──
+    function toggleFavorite() {
+      var btn = document.getElementById('favoriteBtn');
+      var heartIcon = document.getElementById('heartIcon');
+      var favText = document.getElementById('favText');
+      var isActive = btn.classList.contains('active');
+
+      if (isActive) {
+        btn.classList.remove('active');
+        heartIcon.textContent = '\u2661';
+        favText.textContent = 'Save to Favorites';
+      } else {
+        btn.classList.add('active');
+        heartIcon.textContent = '\u2665';
+        favText.textContent = 'Saved to Favorites';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Via International - ISSS Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #E8107C;
+    --purple: #1A0B2E;
+    --green: #2EBF14;
+    --blue: #026FFF;
+    --orange: #FD5A15;
+    --red: #DC2626;
+    --white: #FFFFFF;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --sidebar-w: 240px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--purple);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-logo span {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 0.5px;
+  }
+
+  .sidebar-logo span em {
+    font-style: normal;
+    color: var(--pink);
+  }
+
+  .sidebar-logo .subtitle {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 12px 0;
+    overflow-y: auto;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 20px;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-left: 3px solid transparent;
+  }
+
+  .nav-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.9);
+  }
+
+  .nav-item.active {
+    background: rgba(232,16,124,0.12);
+    color: var(--white);
+    border-left-color: var(--pink);
+  }
+
+  .nav-item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    fill: currentColor;
+  }
+
+  /* ── Main ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar h1 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .notification-bell {
+    position: relative;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+
+  .notification-bell:hover { background: var(--gray-100); }
+
+  .notification-bell svg {
+    width: 22px;
+    height: 22px;
+    fill: var(--gray-500);
+  }
+
+  .bell-badge {
+    position: absolute;
+    top: 0; right: 0;
+    background: var(--red);
+    color: var(--white);
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--white);
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--pink);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ── Content ── */
+  .content {
+    padding: 28px 32px;
+  }
+
+  /* ── Metrics row ── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .metric-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 12px 0 0 12px;
+  }
+
+  .metric-card.blue::before { background: var(--blue); }
+  .metric-card.orange::before { background: var(--orange); }
+  .metric-card.red::before { background: var(--red); }
+  .metric-card.green::before { background: var(--green); }
+
+  .metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .metric-card.blue .metric-value { color: var(--blue); }
+  .metric-card.orange .metric-value { color: var(--orange); }
+  .metric-card.red .metric-value { color: var(--red); }
+  .metric-card.green .metric-value { color: var(--green); }
+
+  .metric-label {
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  /* ── Two-column layout ── */
+  .columns {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 24px;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    border: 1px solid var(--gray-200);
+  }
+
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-header h2 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .card-header a {
+    font-size: 13px;
+    color: var(--pink);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .card-header a:hover { text-decoration: underline; }
+
+  /* ── Table ── */
+  .cases-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .cases-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--gray-400);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .cases-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--gray-50);
+    vertical-align: middle;
+  }
+
+  .cases-table tr:last-child td { border-bottom: none; }
+
+  .cases-table tr:hover { background: var(--gray-50); }
+
+  .student-name {
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge-f1 { background: #EBF5FF; color: var(--blue); }
+  .badge-j1 { background: #F3E8FF; color: #7C3AED; }
+
+  .status-new { background: #DBEAFE; color: #1E40AF; }
+  .status-in-progress { background: #FEF3C7; color: #92400E; }
+  .status-awaiting { background: #FFF7ED; color: var(--orange); }
+  .status-ready { background: #D1FAE5; color: #065F46; }
+
+  .days-open {
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .days-high { color: var(--red); }
+  .days-med { color: var(--orange); }
+  .days-low { color: var(--gray-500); }
+
+  /* ── Right column widgets ── */
+  .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  .deadline-list { padding: 8px 0; }
+
+  .deadline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--gray-50);
+    transition: background 0.1s;
+  }
+
+  .deadline-item:last-child { border-bottom: none; }
+  .deadline-item:hover { background: var(--gray-50); }
+
+  .deadline-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .dot-red { background: var(--red); }
+  .dot-orange { background: var(--orange); }
+  .dot-blue { background: var(--blue); }
+  .dot-green { background: var(--green); }
+
+  .deadline-info { flex: 1; }
+
+  .deadline-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-800);
+  }
+
+  .deadline-meta {
+    font-size: 12px;
+    color: var(--gray-400);
+    margin-top: 2px;
+  }
+
+  .deadline-date {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ── SEVIS Reconciliation ── */
+  .sevis-widget { padding: 20px; }
+
+  .sevis-bar-track {
+    height: 10px;
+    background: var(--gray-200);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0 10px;
+  }
+
+  .sevis-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 10px;
+    transition: width 0.6s ease;
+  }
+
+  .sevis-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .sevis-stats span { color: var(--gray-500); }
+
+  .sevis-stats a {
+    color: var(--red);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .sevis-stats a:hover { text-decoration: underline; }
+
+  .sevis-sync-label {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-800);
+  }
+
+  .sevis-sync-label small {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-400);
+  }
+
+  /* ── Quick Actions ── */
+  .quick-actions { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+
+  .qa-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s ease;
+    width: 100%;
+  }
+
+  .qa-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
+  .qa-btn-primary {
+    background: var(--pink);
+    color: var(--white);
+  }
+
+  .qa-btn-primary:hover {
+    background: #D00D6F;
+    box-shadow: 0 2px 8px rgba(232,16,124,0.3);
+  }
+
+  .qa-btn-secondary {
+    background: var(--white);
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+  }
+
+  .qa-btn-secondary:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+  }
+
+  /* ── Toast ── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toast {
+    background: var(--gray-800);
+    color: var(--white);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.25s ease;
+    max-width: 340px;
+  }
+
+  .toast.hiding {
+    animation: slideOut 0.2s ease forwards;
+  }
+
+  .toast-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .toast-icon svg {
+    width: 10px;
+    height: 10px;
+    fill: var(--white);
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideOut {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(16px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>Via<em>TRM</em></span>
+    <span class="subtitle">International</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item active" data-nav="dashboard">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" data-nav="students">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      Students &amp; Scholars
+    </a>
+    <a class="nav-item" data-nav="requests">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
+      Requests
+    </a>
+    <a class="nav-item" data-nav="sevis">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      SEVIS
+    </a>
+    <a class="nav-item" data-nav="documents">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zm-3-7H9v-2h6v2zm0 4H9v-2h6v2z"/></svg>
+      Documents
+    </a>
+    <a class="nav-item" data-nav="orientations">
+      <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zm-2-9H7v2h10V10zm-4 4H7v2h6v2z"/></svg>
+      Orientations
+    </a>
+    <a class="nav-item" data-nav="reports">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      Reports
+    </a>
+    <a class="nav-item" data-nav="settings">
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      Settings
+    </a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <h1>ISSS Dashboard</h1>
+    <div class="topbar-right">
+      <div class="notification-bell" title="Notifications">
+        <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <span class="bell-badge">3</span>
+      </div>
+      <div class="avatar" title="Sarah Johnson">SJ</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Metrics -->
+    <div class="metrics-row">
+      <div class="metric-card blue">
+        <div class="metric-value">1,247</div>
+        <div class="metric-label">Active Students</div>
+      </div>
+      <div class="metric-card orange">
+        <div class="metric-value">89</div>
+        <div class="metric-label">Pending Requests</div>
+      </div>
+      <div class="metric-card red">
+        <div class="metric-value">12</div>
+        <div class="metric-label">SEVIS Actions Due</div>
+      </div>
+      <div class="metric-card orange">
+        <div class="metric-value">156</div>
+        <div class="metric-label">Documents to Review</div>
+      </div>
+      <div class="metric-card green">
+        <div class="metric-value">99.2%</div>
+        <div class="metric-label">SEVIS Sync Rate</div>
+      </div>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="columns">
+
+      <!-- Left: Assigned Cases -->
+      <div class="card">
+        <div class="card-header">
+          <h2>My Assigned Cases</h2>
+          <a href="#">View All Cases</a>
+        </div>
+        <table class="cases-table">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Visa</th>
+              <th>Request Type</th>
+              <th>Status</th>
+              <th style="text-align:right">Days Open</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="student-name">Yuki Tanaka</td>
+              <td><span class="badge badge-f1">F-1</span></td>
+              <td>OPT Application</td>
+              <td><span class="badge status-new">New</span></td>
+              <td style="text-align:right" class="days-open days-low">1</td>
+            </tr>
+            <tr>
+              <td class="student-name">Amir Patel</td>
+              <td><span class="badge badge-f1">F-1</span></td>
+              <td>CPT Authorization</td>
+              <td><span class="badge status-new">New</span></td>
+              <td style="text-align:right" class="days-open days-low">2</td>
+            </tr>
+            <tr>
+              <td class="student-name">Wei Chen</td>
+              <td><span class="badge badge-f1">F-1</span></td>
+              <td>Program Extension</td>
+              <td><span class="badge status-in-progress">In Progress</span></td>
+              <td style="text-align:right" class="days-open days-med">7</td>
+            </tr>
+            <tr>
+              <td class="student-name">Maria Gonzalez</td>
+              <td><span class="badge badge-j1">J-1</span></td>
+              <td>Change of Status</td>
+              <td><span class="badge status-in-progress">In Progress</span></td>
+              <td style="text-align:right" class="days-open days-med">10</td>
+            </tr>
+            <tr>
+              <td class="student-name">Fatima Al-Rashid</td>
+              <td><span class="badge badge-f1">F-1</span></td>
+              <td>OPT Application</td>
+              <td><span class="badge status-awaiting">Awaiting Student</span></td>
+              <td style="text-align:right" class="days-open days-high">14</td>
+            </tr>
+            <tr>
+              <td class="student-name">Dmitry Volkov</td>
+              <td><span class="badge badge-j1">J-1</span></td>
+              <td>Program Extension</td>
+              <td><span class="badge status-ready">Ready for SEVIS</span></td>
+              <td style="text-align:right" class="days-open days-high">18</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Right column -->
+      <div class="right-col">
+
+        <!-- Upcoming Deadlines -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Upcoming Deadlines</h2>
+            <a href="#">View Calendar</a>
+          </div>
+          <div class="deadline-list">
+            <div class="deadline-item">
+              <span class="deadline-dot dot-red"></span>
+              <div class="deadline-info">
+                <div class="deadline-title">Program End Date</div>
+                <div class="deadline-meta">3 students affected</div>
+              </div>
+              <span class="deadline-date" style="color:var(--red)">Mar 20</span>
+            </div>
+            <div class="deadline-item">
+              <span class="deadline-dot dot-orange"></span>
+              <div class="deadline-info">
+                <div class="deadline-title">OPT Application Window Closes</div>
+                <div class="deadline-meta">8 students affected</div>
+              </div>
+              <span class="deadline-date" style="color:var(--orange)">Mar 25</span>
+            </div>
+            <div class="deadline-item">
+              <span class="deadline-dot dot-blue"></span>
+              <div class="deadline-info">
+                <div class="deadline-title">SEVIS Registration Deadline</div>
+                <div class="deadline-meta">22 students affected</div>
+              </div>
+              <span class="deadline-date" style="color:var(--blue)">Apr 1</span>
+            </div>
+            <div class="deadline-item">
+              <span class="deadline-dot dot-green"></span>
+              <div class="deadline-info">
+                <div class="deadline-title">Spring Orientation Prep</div>
+                <div class="deadline-meta">45 incoming students</div>
+              </div>
+              <span class="deadline-date" style="color:var(--green)">Apr 10</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEVIS Reconciliation -->
+        <div class="card">
+          <div class="card-header">
+            <h2>SEVIS Reconciliation</h2>
+          </div>
+          <div class="sevis-widget">
+            <div class="sevis-sync-label">1,235 <small>/ 1,247</small></div>
+            <div class="sevis-bar-track">
+              <div class="sevis-bar-fill" style="width:99.04%"></div>
+            </div>
+            <div class="sevis-stats">
+              <span>Records in Sync</span>
+              <a href="#">12 discrepancies</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Quick Actions</h2>
+          </div>
+          <div class="quick-actions">
+            <button class="qa-btn qa-btn-primary" data-toast="Processing batch SEVIS update...">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+              Process Batch SEVIS
+            </button>
+            <button class="qa-btn qa-btn-secondary" data-toast="Opening I-20 issuance form...">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+              Issue I-20
+            </button>
+            <button class="qa-btn qa-btn-secondary" data-toast="Generating reconciliation report...">
+              <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+              Run Reconciliation Report
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // Toast notification system using safe DOM methods
+  function showToast(message) {
+    var container = document.getElementById('toastContainer');
+
+    var toast = document.createElement('div');
+    toast.className = 'toast';
+
+    // Build icon using DOM methods
+    var iconWrap = document.createElement('span');
+    iconWrap.className = 'toast-icon';
+    var iconSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    iconSvg.setAttribute('viewBox', '0 0 24 24');
+    var iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    iconPath.setAttribute('d', 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z');
+    iconSvg.appendChild(iconPath);
+    iconWrap.appendChild(iconSvg);
+
+    // Build text span
+    var textSpan = document.createElement('span');
+    textSpan.textContent = message;
+
+    toast.appendChild(iconWrap);
+    toast.appendChild(textSpan);
+    container.appendChild(toast);
+
+    setTimeout(function() {
+      toast.classList.add('hiding');
+      setTimeout(function() {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 200);
+    }, 3000);
+  }
+
+  // Quick Action buttons - read message from data attribute
+  document.querySelectorAll('.qa-btn[data-toast]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      showToast(this.getAttribute('data-toast'));
+    });
+  });
+
+  // Sidebar nav hover/active state
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(function(n) {
+        n.classList.remove('active');
+      });
+      this.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
